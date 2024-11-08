@@ -53,7 +53,7 @@ FINAL_HTML = '''
         <table>
             %s
         </table>
-        <p>%s<br>%s<br>%s<br>%s</p>
+        <p>%s<br>%s<br>%s</p>
     </body>
 </html>'''
 ROW_HTML = '<tr>%s</tr>' % ('%s' * 6)
@@ -69,8 +69,6 @@ NOTES = (
     'Only current King County Metro and Sound Transit routes are included'\
     + ' (not <a href="https://kingcounty.gov/en/dept/metro/routes-and-service/'\
     + 'service-change">suspended routes</a>).',
-    'Photographs of routes with <span class="replaced">Replaced</span> tag'\
-    + ' have been replaced due to insufficient image legibility.',
     'Routes with <span class="discontinued">Discontinued</span> tag have been'\
     + ' discontinued since their completion.',
     'Routes with <span class="delisted">Delisted</span> tag remain operational'\
@@ -151,8 +149,6 @@ class RouteListing:
         Not called if nonexistence flag is set.
         '''
         self.img = self.number + '.jpg'
-        self.replaced = '–' + self.img in images
-        images.discard('–' + self.img)
         if self.img in images:
             secs = os.stat(os.path.join(IMG_PATH, self.img)).st_birthtime
             self.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
@@ -179,8 +175,6 @@ class RouteListing:
         note = ('none', '')
         if self.is_dart:
             note = ('dart', 'DART')
-        elif self.replaced:
-            note = ('replaced', 'Replaced')
         elif self.nonexistence == 1:
             note = ('discontinued', 'Discontinued')
         elif self.nonexistence == 2:
