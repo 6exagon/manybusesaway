@@ -1,0 +1,96 @@
+body {
+    margin: 15px;
+    background-color: #f4f4f4;
+    font-family: Verdana, sans-serif;
+    font-size: 16px;
+    color: black
+}
+
+h1 {
+    font-size: 32px;
+    font-style: italic;
+    font-weight: normal;
+    margin: 0px;
+}
+
+h2 {
+    font-size: 18px;
+    font-style: italic;
+    font-weight: normal;
+    margin-top: 5px;
+}
+
+h3 {
+    font-size: 10px;
+    font-style: italic;
+    font-weight: normal;
+    top: -9px;
+    position: relative;
+}
+
+table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    background-color: #ebebeb;
+}
+
+td {
+    border: 2px solid black;
+    vertical-align: middle;
+    padding: 5px;
+}
+
+td:nth-child(1) {
+    text-align: right;
+    font-weight: bold;
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: 22px;
+}
+td:nth-child(1):hover {color: blue; cursor: pointer;}
+td:nth-child(2) {font-style: italic; width: 340px;}
+td:nth-child(2):hover {color: blue; cursor: pointer;}
+td:nth-child(3) {font-style: italic; width: 340px;}
+td:nth-child(3):hover {color: blue; cursor: pointer;}
+td:nth-child(4) {text-align: center; width: 100px;}
+td:nth-child(5) {text-align: center; width: 160px;}
+td:nth-child(6) {padding: 0px; line-height: 0; height: 100px;}
+img:hover {
+    cursor: pointer;
+    filter: opacity(50%);
+}
+
+.b-trolley {background-color: #4f1568; color: white}
+.n-trolley {background-color: #ad76c4;}
+.b-rapidride {background-color: #b60000; color: white}
+.n-rapidride {background-color: #ef5a5d;}
+.b-schools {background-color: #4abeba;}
+.n-schools {background-color: #bfcfcf;}
+.b-special-snow {background-color: #00ffff;}
+.n-special-snow {background-color: #d4ffff;}
+
+.b-0 {background-color: #0a664f; color: white}
+.n-0 {background-color: #62b39d;}
+.b-1 {background-color: #1c7b8c;}
+.n-1 {background-color: #69acb8;}
+.b-2 {background-color: #1f279c; color: white}
+.n-2 {background-color: #6a72de;}
+.b-3 {background-color: #009e9b;}
+.n-3 {background-color: #7acccb;}
+.b-5 {background-color: #f0f0ff;}
+.n-5 {background-color: #c7d8f5;}
+.b-7 {background-color: #a69608;}
+.n-7 {background-color: #bfb44d;}
+
+.dart {
+    color: #29198f;
+    font-style: italic;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 0.15rem;
+}
+.replaced {color: #90856a;}
+.discontinued {color: #8a1919;}
+.delisted {color: #f70000;}
+.complete {background-color: #b4ffc0; font-family: "Arial", sans-serif;}
+.incomplete {background-color: #d9d9d9; color: #707070; font-size: 10px;}
