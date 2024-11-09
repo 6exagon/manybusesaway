@@ -65,21 +65,21 @@ img:hover {
 .n-rapidride {background-color: #ef5a5d;}
 .b-schools {background-color: #4abeba;}
 .n-schools {background-color: #bfcfcf;}
-.b-special-snow {background-color: #00ffff;}
-.n-special-snow {background-color: #d4ffff;}
+.b-special {background-color: #00ffff;}
+.n-special {background-color: #d4ffff;}
 
-.b-0 {background-color: #0a664f; color: white}
-.n-0 {background-color: #62b39d;}
-.b-1 {background-color: #1c7b8c;}
-.n-1 {background-color: #69acb8;}
-.b-2 {background-color: #1f279c; color: white}
-.n-2 {background-color: #6a72de;}
-.b-3 {background-color: #009e9b;}
-.n-3 {background-color: #7acccb;}
-.b-5 {background-color: #f0f0ff;}
-.n-5 {background-color: #c7d8f5;}
-.b-7 {background-color: #a69608;}
-.n-7 {background-color: #bfb44d;}
+.b-K0 {background-color: #0a664f; color: white}
+.n-K0 {background-color: #62b39d;}
+.b-K1 {background-color: #1c7b8c;}
+.n-K1 {background-color: #69acb8;}
+.b-K2 {background-color: #1f279c; color: white}
+.n-K2 {background-color: #6a72de;}
+.b-K3 {background-color: #009e9b;}
+.n-K3 {background-color: #7acccb;}
+.b-K7 {background-color: #a69608;}
+.n-K7 {background-color: #bfb44d;}
+.b-S5 {background-color: #f0f0ff;}
+.n-S5 {background-color: #c7d8f5;}
 
 .dart {
     color: #29198f;

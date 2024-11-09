@@ -31,3 +31,4 @@ Most buses are straightfowardly from one of the three transit agencies, and thes
 - `634` and `636` are the Trailhead Direct buses to the Issaquah Alps and Mount Si, respectively. These are seasonal.
 - `671` through `678` are the King County RapidRide A through H lines. These are included by letter rather than by number.
 - `973` and `975` are the King County Water Taxis to Vashon Island and West Seattle, respectively.
+- `893`, `895`, and `981` through `994` are buses serving high schools in King County, managed by King County Metro Transit. Per the [Lakeside School website](https://www.lakesideschool.org/about-us/transportation), it is permissible to ride these as a non-student.

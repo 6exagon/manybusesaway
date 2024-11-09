@@ -19,10 +19,10 @@ from datetime import datetime
 import time
 
 # Current King County Metro URL, may be subject to change in the future
-JS_METRO_URL = 'https://cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
+JS_KCM_URL = 'https://cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
     + 'fe-apps/schedule/09142024/js/find-a-schedule-js.js'\
     + '?rev=b74ceeb7db85476cb2f92719c10e956f'
-JS_METRO_TRIM = (
+JS_KCM_TRIM = (
     '<option value="" selected="">Enter route or location</option>\\n    ',
     '\\n  </select>\\n\\x3c!-- end route selector --')
 HTML_TROLLEY_URL = 'https://metro.kingcounty.gov/up/rr/m-trolley.html'
@@ -60,10 +60,11 @@ ROW_HTML = '<tr>%s</tr>' % ('%s' * 6)
 # The following are for clickable <td> sections opening new tabs
 IMG_LINK = IMG_PATH + '/%s'
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
-METRO_ROUTE_LINK = 'https://kingcounty.gov/en/dept/metro/routes-and-service/'\
+KCM_ROUTE_LINK = 'https://kingcounty.gov/en/dept/metro/routes-and-service/'\
     + 'schedules-and-maps/%s.html#%s'
-METRO_HASH = ('weekday', 'weekday-b', 'route-map')
-ST_ROUTE_LINK = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s'
+KCM_ROUTE_OPTIONS = ('route-map', 'weekday', 'weekday-b')
+ST_ROUTE_LINK = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
+ST_ROUTE_OPTIONS = ('', '?direction=0', '?direction=1')
 
 NOTES = (
     'Only current King County Metro and Sound Transit routes are included'\
@@ -80,92 +81,60 @@ This class allows for easier management of table rows and their associated data
 and images.
 '''
 class RouteListing:
-    def __init__(self, string, pattern, delimiter):
-        '''
-        Sets up self from route listing string string, using re.Pattern pattern
-        and string delimiter. Nonexistence flag is for main function to modify.
-        '''
-        string = string.replace('&amp;', '&').replace('–', '-').replace('\\', '')
-        match = pattern.fullmatch(string)
-        if not match:
-            raise AttributeError
-        self.number, path = match.group(1), match.group(2)
-        self.is_dart = False
-        if 'Line' in self.number:
-            self.number = self.number[0]
-            self.css_class = 'rapidride'
-        elif 'DART' in self.number:
-            self.number = self.number.lstrip('DART ')
-            # Note that 775 is not DART but needs DART palette, so this is a fix
-            self.css_class = '7'
-            self.is_dart = True
-        elif 'Shuttle' in self.number or re.fullmatch('9.', self.number):
-            self.number = self.number.rstrip(' Shuttle')
-            self.css_class = 'special-snow'
+    def __init__(self, number, agency):
+        self.number = number
+        self.agency = agency
+        if self.number.isnumeric():
+            num = int(self.number)
+            if not hasattr(self, 'css_class'):
+                self.css_class = agency + str(num // 100)
+            # Here begin a bunch of edge cases
+            if self.css_class == 'C4':
+                self.css_class = 'C9'
+            elif self.css_class == 'C5':
+                raise AttributeError    # These routes shown by ST and CT both
+            elif self.css_class == 'K0' and num in range(90, 100):
+                self.css_class = 'special'
+            elif self.agency == 'S' and num in ('599', '600'):
+                self.css_class = 'special'
         else:
-            try:
-                self.css_class = str(int(self.number) // 100)
-            except ValueError:
-                raise AttributeError    # Do not allow Water Taxi, SVT, etc.
-        self.set_terminals(path, delimiter)
-        self.nonexistence = 0
+            if 'DART' in self.number:
+                self.css_class = 'K7'
+            else:
+                self.css_class = {'K': 'rapidride', 'C': 'swift'}[self.agency]
+        self.start = ''
+        self.finish = ''
+    def position(self):
+        '''
+        Returns position in ordering on website, sensitive to order of transit
+        agencies and special route status.
+        '''
+        basenum = 'KSC'.index(self.agency) * 2000
+        if not self.number.isnumeric():
+            if 'DART' in self.number:
+                return basenum + int(self.number.lstrip('DART'))
+            return basenum - 256 + ord(self.number[0])
+        return basenum + int(self.number)
     def __lt__(self, other):
         '''
         Returns whether self is less than RouteListing other, for purposes of
         comparison.
         '''
-        rr = (self.css_class == 'rapidride') + (other.css_class == 'rapidride')
-        if rr == 2:
-            return self.number < other.number
-        elif rr == 1:
-            return self.css_class == 'rapidride'
-        else:
-            return int(self.number) < int(other.number)
+        return self.position() < other.position()
     def __str__(self):
         '''Returns string representation of self, for debugging purposes.'''
-        return ('ᴰᴬᴿᵀ' if self.is_dart else ' ' * 4) + self.number.ljust(4)\
-            + self.css_class + ' ' + self.start + ' ⬌ ' + self.finish
-    def set_terminals(self, path, delimiter):
-        '''
-        Called from constructor, sets self.start and self.finish given string
-        path (list of destinations, separated by string delimiter).
-        '''
-        match = re.match('Service between (.*) and (the | )(.*)', path)
-        if match:                       # Catches King County edge case
-            self.start, self.finish = match.group(1), match.group(3)
-        else:
-            destinations = path.split(delimiter)
-            while destinations[0].startswith('Serves'):
-                del destinations[0]
-                self.css_class = 'schools'
-                if 'School' in destinations[0]:
-                    del destinations[0] # Catches King County edge case
-            self.start = destinations[0].lstrip().rstrip()
-            self.finish = destinations[-1].lstrip().rstrip()
-    def find_image(self, images):
-        '''
-        Sets self.img, self.datetime, and self.replaced by checking images
-        parameter for existence and local filesystem for stats.
-        Not called if nonexistence flag is set.
-        '''
-        self.img = self.number + '.jpg'
-        if self.img in images:
-            secs = os.stat(os.path.join(IMG_PATH, self.img)).st_birthtime
-            self.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
-            images.remove(self.img)
-        else:
-            self.img = None
-            self.datetime = 'Incomplete'
-    def link(self, hashtag):
-        '''Adds the correct HTML link to string text, with #hashtag.'''
+        return self.number.ljust(4) + self.css_class + ' ' + self.start\
+            + ' ⬌ ' + self.finish
+    def link(self, param):
+        '''Adds the correct HTML link to string text, with param in URL.'''
         if self.nonexistence:
             return ''
-        if self.css_class == '5':       # Sound Transit Website, not fancy, no #
-            return ST_ROUTE_LINK % self.number
+        if self.agency == 'S':
+            return ST_ROUTE_LINK % (self.number, param)
         elif self.css_class == 'rapidride':
-            return METRO_ROUTE_LINK % (self.number + '-line', hashtag)
+            return KCM_ROUTE_LINK % (self.number + '-line', param)
         else:
-            return METRO_ROUTE_LINK % (self.number.zfill(3), hashtag)
+            return KCM_ROUTE_LINK % (self.number.zfill(3), param)
     def to_html(self):
         '''
         Returns this row's <tr> HTML element for the final table.
@@ -173,9 +142,7 @@ class RouteListing:
         by hand, but it is more simple when generating it.
         '''
         note = ('none', '')
-        if self.is_dart:
-            note = ('dart', 'DART')
-        elif self.nonexistence == 1:
+        if self.nonexistence == 1:
             note = ('discontinued', 'Discontinued')
         elif self.nonexistence == 2:
             note = ('delisted', 'Delisted')
@@ -188,13 +155,75 @@ class RouteListing:
                 False)
         else:
             i_td = td('none', '')
+        params = {'K': KCM_ROUTE_OPTIONS, 'S': ST_ROUTE_OPTIONS}[self.agency]
         return ROW_HTML % (
-            td('b-' + self.css_class, self.number, self.link(METRO_HASH[2])),
-            td('n-' + self.css_class, self.start, self.link(METRO_HASH[0])),
-            td('n-' + self.css_class, self.finish, self.link(METRO_HASH[1])),
+            td('b-' + self.css_class, self.number, self.link(params[0])),
+            td('n-' + self.css_class, self.start, self.link(params[1])),
+            td('n-' + self.css_class, self.finish, self.link(params[2])),
             td(*note),
             td('complete' if self.img else 'incomplete', self.datetime),
             i_td)
+
+'''
+This class extends RouteListing to automatically perform setup based on website
+data, calls RouteListing constructor after custom setup.
+'''
+class WebRouteListing(RouteListing):
+    def __init__(self, string, pattern, delimiter, agency):
+        '''
+        Sets up self from route listing string string, using re.Pattern pattern
+        and string delimiter. Nonexistence flag is for main function to modify.
+        '''
+        string = string.replace('&amp;', '&').replace('–', '-').replace('\\', '')
+        match = pattern.fullmatch(string)
+        if not match:
+            raise AttributeError
+        self.number, path = match.group(1), match.group(2)
+        self.is_dart = False
+        if 'Line' in self.number:
+            self.number = self.number[0]
+        elif 'DART' in self.number:
+            # Note that 775 is not DART but needs DART palette, so this is a fix
+            self.css_class = 'K7'
+            self.number = self.number.replace(' ', '')
+        elif 'Shuttle' in self.number:
+            self.number = self.number.rstrip(' Shuttle')
+            self.css_class = 'snow'
+        elif not self.number.isnumeric():
+            raise AttributeError        # Do not include Water Taxi, etc. here
+        super().__init__(self.number, agency)
+        self.set_terminals(path, delimiter)
+        self.nonexistence = 0           # This is true for all WebRouteListings
+    def set_terminals(self, path, delimiter):
+        '''
+        Called from constructor, sets self.start and self.finish given string
+        path (list of destinations, separated by string delimiter).
+        '''
+        match = re.match('Service between (.*) and (the | )(.*)', path)
+        if match:                       # Catches King County edge case
+            self.start, self.finish = match.group(1), match.group(3)
+        else:
+            destinations = path.split(delimiter)
+            if destinations[0].startswith('Serves'):
+                del destinations[0]
+                self.css_class = 'schools'
+                if 'School' in destinations[0]:
+                    del destinations[0] # Catches King County edge case
+            self.start = destinations[0].lstrip().rstrip()
+            self.finish = destinations[-1].lstrip().rstrip()
+    def find_image(self, images):
+        '''
+        Sets self.img and self.datetime by checking images
+        parameter for existence and local filesystem for stats.
+        '''
+        self.img = self.agency + self.number + '.jpg'
+        if self.img in images:
+            secs = os.stat(os.path.join(IMG_PATH, self.img)).st_birthtime
+            self.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
+            images.remove(self.img)
+        else:
+            self.img = None
+            self.datetime = 'Incomplete'
 
 def fetch_file(url):
     '''Given string url, returns contents of file fetched from it in UTF-8.'''
@@ -252,14 +281,14 @@ def main():
         if x.endswith('.jpg'):
             images.add(x)
 
-    js_metro = fetch_file(JS_METRO_URL)               
-    scan = js_metro.partition(JS_METRO_TRIM[0])[2].partition(JS_METRO_TRIM[1])[0]
+    js_metro = fetch_file(JS_KCM_URL)
+    scan = js_metro.partition(JS_KCM_TRIM[0])[2].partition(JS_KCM_TRIM[1])[0]
     options = [in_angles.sub('', x) for x in scan.split('\\n    ')]
     html_trolley = fetch_file(HTML_TROLLEY_URL)
     pattern = re.compile('(.*) - (.*)')
     for o in options:
         try:
-            rl = RouteListing(o, pattern, ',')
+            rl = WebRouteListing(o, pattern, ',', 'K')
             rl.find_image(images)
             if 'Route ' + rl.number in html_trolley:
                 rl.css_class = 'trolley'
@@ -273,22 +302,20 @@ def main():
     pattern = re.compile('(\\d*)\\s\\((.*)\\).*\\n?')
     for o in options:
         try:
-            rl = RouteListing(o, pattern, '- ')
+            rl = WebRouteListing(o, pattern, '- ', 'S')
             rl.find_image(images)
             route_listings.append(rl)
         except AttributeError:
             continue
 
-    pattern = re.compile('\\*?–?(.*)\\.jpg(.*)')
     # All remaining images are '*#.jpg' (delisted) or '#.jpg' (discontinued)
     while len(images):
         i = images.pop()
-        rl = RouteListing(i, pattern, ' ')
-        rl.replaced = 0
+        temp = i.rstrip('.jpg').lstrip('*')
+        rl = RouteListing(temp[1:], temp[0])
         rl.nonexistence = i.startswith('*') + 1
         rl.img = i
-        images.discard('–' + i)
-        if rl.css_class in ('8', '9'):
+        if rl.css_class in ('K8', 'K9'):
             rl.css_class = 'schools'    # Cannot check for "Serves" if absent
         secs = os.stat(os.path.join(IMG_PATH, i)).st_birthtime
         rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
