@@ -50,13 +50,12 @@ FINAL_HTML = '''
     <body>
         <h1>Completed Buses</h1>
         %s
-        <table>
-            %s
+        <table>%s
         </table>
         <p>%s<br>%s<br>%s</p>
     </body>
 </html>'''
-ROW_HTML = '<tr>%s</tr>' % ('%s' * 6)
+ROW_HTML = '\n%s<tr>%s</tr>' % (' ' * 12, '%s' * 6)
 # The following are for clickable <td> sections opening new tabs
 IMG_LINK = IMG_PATH + '/%s'
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
