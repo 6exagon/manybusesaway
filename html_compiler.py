@@ -82,6 +82,11 @@ and images.
 '''
 class RouteListing:
     def __init__(self, number, agency):
+        '''
+        Sets up self from number and agency strings, This constructor is only
+        called directly from image-only setup. self.nonexistence is not set
+        here but by child class or by image setup.
+        '''
         self.number = number
         self.agency = agency
         if self.number.isnumeric():
@@ -89,13 +94,13 @@ class RouteListing:
             if not hasattr(self, 'css_class'):
                 self.css_class = agency + str(num // 100)
             # Here begin a bunch of edge cases
+            if agency == 'X':
+                self.css_class = 'nonbus'
             if self.css_class == 'C4':
                 self.css_class = 'C9'
             elif self.css_class == 'C5':
                 raise AttributeError    # These routes shown by ST and CT both
             elif self.css_class == 'K0' and num in range(90, 100):
-                self.css_class = 'special'
-            elif self.agency == 'S' and num in ('599', '600'):
                 self.css_class = 'special'
         else:
             if 'DART' in self.number:
@@ -109,7 +114,7 @@ class RouteListing:
         Returns position in ordering on website, sensitive to order of transit
         agencies and special route status.
         '''
-        basenum = 'KSC'.index(self.agency) * 2000
+        basenum = 'KSCX'.index(self.agency) * 2000
         if not self.number.isnumeric():
             if 'DART' in self.number:
                 return basenum + int(self.number.lstrip('DART'))
@@ -150,14 +155,17 @@ class RouteListing:
             i_link = IMG_LINK % self.img
             i_td = td(
                 'none',
-                IMG_HTML % (i_link, self.img, self.img),
+                IMG_HTML % (i_link, self.number, self.number),
                 i_link,
                 False)
         else:
             i_td = td('none', '')
         params = {'K': KCM_ROUTE_OPTIONS, 'S': ST_ROUTE_OPTIONS}[self.agency]
+        display_num = self.number
+        if 'DART' in display_num:
+            display_num = '<p class="dart">DART</p>' + display_num.lstrip('DART')
         return ROW_HTML % (
-            td('b-' + self.css_class, self.number, self.link(params[0])),
+            td('b-' + self.css_class, display_num, self.link(params[0])),
             td('n-' + self.css_class, self.start, self.link(params[1])),
             td('n-' + self.css_class, self.finish, self.link(params[2])),
             td(*note),
@@ -188,7 +196,6 @@ class WebRouteListing(RouteListing):
             self.number = self.number.replace(' ', '')
         elif 'Shuttle' in self.number:
             self.number = self.number.rstrip(' Shuttle')
-            self.css_class = 'snow'
         elif not self.number.isnumeric():
             raise AttributeError        # Do not include Water Taxi, etc. here
         super().__init__(self.number, agency)
@@ -258,7 +265,7 @@ def completenessHTML(route_listings):
     for rl in route_listings:
         if not rl.img:
             can_fc = False
-        if rl.css_class != 'special-snow' and not rl.nonexistence:
+        if rl.css_class != 'special' and not rl.nonexistence:
             total += 1
             completed += 1 if rl.img else 0
     if can_fc:
@@ -314,6 +321,8 @@ def main():
         temp = i.rstrip('.jpg').lstrip('*')
         rl = RouteListing(temp[1:], temp[0])
         rl.nonexistence = i.startswith('*') + 1
+        if rl.agency == 'X' and rl.nonexistence == 1:
+            rl.nonexistence = 0
         rl.img = i
         if rl.css_class in ('K8', 'K9'):
             rl.css_class = 'schools'    # Cannot check for "Serves" if absent

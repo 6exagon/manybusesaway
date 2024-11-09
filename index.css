@@ -65,8 +65,10 @@ img:hover {
 .n-rapidride {background-color: #ef5a5d;}
 .b-schools {background-color: #4abeba;}
 .n-schools {background-color: #bfcfcf;}
-.b-special {background-color: #00ffff;}
-.n-special {background-color: #d4ffff;}
+.b-special {background-color: #a69608;}
+.n-special {background-color: #bfb44d;}
+.b-nonbus {background-color: #2faf2f;}
+.n-nonbus {background-color: #7fff7f;}
 
 .b-K0 {background-color: #0a664f; color: white}
 .n-K0 {background-color: #62b39d;}
@@ -76,18 +78,21 @@ img:hover {
 .n-K2 {background-color: #6a72de;}
 .b-K3 {background-color: #009e9b;}
 .n-K3 {background-color: #7acccb;}
-.b-K7 {background-color: #a69608;}
-.n-K7 {background-color: #bfb44d;}
+.b-K7 {background-color: #13006a; color: white}
+.n-K7 {background-color: #7370c0;}
 .b-S5 {background-color: #f0f0ff;}
 .n-S5 {background-color: #c7d8f5;}
+.b-C5 {background-color: #00ffff;}
+.n-C5 {background-color: #d4ffff;}
 
 .dart {
-    color: #29198f;
+    color: #ef2400;
     font-style: italic;
-    font-family: Arial, sans-serif;
-    font-size: 24px;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 12px;
     font-weight: bold;
-    letter-spacing: 0.15rem;
+    margin: -2px;
+    letter-spacing: 0.06rem;
 }
 .discontinued {color: #8a1919;}
 .delisted {color: #f70000;}
