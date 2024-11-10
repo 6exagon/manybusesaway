@@ -33,6 +33,11 @@ HTML_ST_TRIM = (
     '<p>To print or download individual route schedules and maps click the '\
     + 'PDF.</p><ul><li>',
     '</li></ul></div>')
+HTML_CT_URL = 'https://www.communitytransit.org/maps-and-schedules/'\
+    + 'maps-and-schedules-by-route'
+HTML_CT_TRIM = (
+    'var _routes = [{',
+    '}];')
 
 TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 
@@ -63,7 +68,9 @@ KCM_ROUTE_LINK = 'https://kingcounty.gov/en/dept/metro/routes-and-service/'\
     + 'schedules-and-maps/%s.html#%s'
 KCM_ROUTE_OPTIONS = ('route-map', 'weekday', 'weekday-b')
 ST_ROUTE_LINK = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
-ST_ROUTE_OPTIONS = ('', '?direction=0', '?direction=1')
+ST_ROUTE_OPTIONS = ('', '?direction=1', '?direction=0')
+CT_ROUTE_LINK = 'https://www.communitytransit.org/route/%s%s/table'
+CT_ROUTE_OPTIONS = ('', '/0', '')
 
 NOTES = (
     'Only current King County Metro and Sound Transit routes are included'\
@@ -105,7 +112,7 @@ class RouteListing:
             if 'DART' in self.number:
                 self.css_class = 'K7'
             else:
-                self.css_class = {'K': 'rapidride', 'C': 'swift'}[self.agency]
+                self.css_class = 'rapidride'
         self.start = ''
         self.finish = ''
     def position(self):
@@ -133,12 +140,14 @@ class RouteListing:
         '''Adds the correct HTML link to string text, with param in URL.'''
         if self.nonexistence:
             return ''
-        if self.agency == 'S':
+        elif self.agency == 'S':
             return ST_ROUTE_LINK % (self.number, param)
+        elif self.agency == 'C':
+            return CT_ROUTE_LINK % (self.number, param)
         elif self.css_class == 'rapidride':
             return KCM_ROUTE_LINK % (self.number + '-line', param)
         else:
-            return KCM_ROUTE_LINK % (self.number.zfill(3), param)
+            return KCM_ROUTE_LINK % (self.number.lstrip('DART').zfill(3), param)
     def to_html(self):
         '''
         Returns this row's <tr> HTML element for the final table.
@@ -159,10 +168,15 @@ class RouteListing:
                 False)
         else:
             i_td = td('none', '')
-        params = {'K': KCM_ROUTE_OPTIONS, 'S': ST_ROUTE_OPTIONS}[self.agency]
+        params = {
+            'K': KCM_ROUTE_OPTIONS,
+            'S': ST_ROUTE_OPTIONS,
+            'C': CT_ROUTE_OPTIONS}[self.agency]
         display_num = self.number
         if 'DART' in display_num:
             display_num = '<p class="dart">DART</p>' + display_num.lstrip('DART')
+        elif self.css_class == 'C7':
+            display_num = '<p class="swift">Swift</p>' + display_num
         return ROW_HTML % (
             td('b-' + self.css_class, display_num, self.link(params[0])),
             td('n-' + self.css_class, self.start, self.link(params[1])),
@@ -309,6 +323,19 @@ def main():
     for o in options:
         try:
             rl = WebRouteListing(o, pattern, '- ', 'S')
+            rl.find_image(images)
+            route_listings.append(rl)
+        except AttributeError:
+            continue
+
+    html_ct = fetch_file(HTML_CT_URL)
+    scan = html_ct.partition(HTML_CT_TRIM[0])[2].partition(HTML_CT_TRIM[1])[0]
+    options = scan.split('},{')
+    pattern = re.compile(
+        '"route_id":"(\\d*)","route_name":"(.*)","route_short_name".*')
+    for o in options:
+        try:
+            rl = WebRouteListing(o, pattern, '|', 'C')
             rl.find_image(images)
             route_listings.append(rl)
         except AttributeError:
