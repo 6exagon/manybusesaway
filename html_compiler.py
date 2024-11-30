@@ -6,10 +6,8 @@ GitHub) are needed to render the page.
 However, this progam is not standalone; it requires aforementioned photographs
 (when they exist) to be inside a "./images" folder in the current working
 directory.
-Also, the HTML file produced ("index.html") is designed to accompany an
-"index.css" file and a "icon.ico" file, also intended to be in the current
-working directory.
 This allows each type of route to have its own color scheme, among other things.
+See README.md for more details.
 '''
 
 import os
@@ -33,6 +31,8 @@ HTML_ST_TRIM = (
     '<p>To print or download individual route schedules and maps click the '\
     + 'PDF.</p><ul><li>',
     '</li></ul></div>')
+# No plaintext route terminals available anywhere on ET website officially
+ET_PATH = 'everett_transit.csv'
 HTML_CT_URL = 'https://www.communitytransit.org/maps-and-schedules/'\
     + 'maps-and-schedules-by-route'
 HTML_CT_TRIM = (
@@ -57,7 +57,7 @@ FINAL_HTML = '''
         %s
         <table>%s
         </table>
-        <p>%s<br>%s<br>%s</p>
+        <p>%s</p>
     </body>
 </html>'''
 ROW_HTML = '\n%s<tr>%s</tr>' % (' ' * 12, '%s' * 6)
@@ -69,18 +69,19 @@ KCM_ROUTE_LINK = 'https://kingcounty.gov/en/dept/metro/routes-and-service/'\
 KCM_ROUTE_OPTIONS = ('route-map', 'weekday', 'weekday-b')
 ST_ROUTE_LINK = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
 ST_ROUTE_OPTIONS = ('', '?direction=1', '?direction=0')
+ET_ROUTE_LINK = 'https://everetttransit.org/DocumentCenter/View/%s#page=%s'
+ET_ROUTE_OPTIONS = ('1', '2', '2')
 CT_ROUTE_LINK = 'https://www.communitytransit.org/route/%s%s/table'
 CT_ROUTE_OPTIONS = ('', '/0', '')
 
-NOTES = (
-    'Only current King County Metro and Sound Transit routes are included'\
-    + ' (not <a href="https://kingcounty.gov/en/dept/metro/routes-and-service/'\
-    + 'service-change">suspended routes</a>).',
-    'Routes with <span class="discontinued">Discontinued</span> tag have been'\
-    + ' discontinued since their completion.',
-    'Routes with <span class="delisted">Delisted</span> tag remain operational'\
-    + ' but are absent from public transit agency websites (possibly'\
-    + ' intentionally).')
+NOTES = '''Only current King County Metro, Sound Transit, Everett Transit, and
+ Community Transit routes are included.<br>
+King County Metro and Sound Transit routes from immediately before the
+ September 2024 service change are also included.<br>
+Routes with <span class="discontinued">Discontinued</span> tag have been
+ discontinued since their completion.<br>
+Routes with <span class="delisted">Delisted</span> tag remain operational
+ but are absent from public transit agency websites (possibly intentionally).'''
 
 '''
 This class allows for easier management of table rows and their associated data
@@ -120,7 +121,7 @@ class RouteListing:
         Returns position in ordering on website, sensitive to order of transit
         agencies and special route status.
         '''
-        basenum = 'KSCX'.index(self.agency) * 2000
+        basenum = 'KSECX'.index(self.agency) * 2000
         if not self.number.isnumeric():
             if 'DART' in self.number:
                 return basenum + int(self.number.lstrip('DART'))
@@ -134,7 +135,7 @@ class RouteListing:
         return self.position() < other.position()
     def __str__(self):
         '''Returns string representation of self, for debugging purposes.'''
-        return self.number.ljust(4) + self.css_class + ' ' + self.start\
+        return self.number.ljust(8) + self.css_class + ' ' + self.start\
             + ' ⬌ ' + self.finish
     def link(self, param):
         '''Adds the correct HTML link to string text, with param in URL.'''
@@ -142,6 +143,8 @@ class RouteListing:
             return ''
         elif self.agency == 'S':
             return ST_ROUTE_LINK % (self.number, param)
+        elif self.agency == 'E':
+            return ET_ROUTE_LINK % (self.et_link_num, param)
         elif self.agency == 'C':
             return CT_ROUTE_LINK % (self.number, param)
         elif self.css_class == 'rapidride':
@@ -171,6 +174,7 @@ class RouteListing:
         params = {
             'K': KCM_ROUTE_OPTIONS,
             'S': ST_ROUTE_OPTIONS,
+            'E': ET_ROUTE_OPTIONS,
             'C': CT_ROUTE_OPTIONS}[self.agency]
         display_num = self.number
         if 'DART' in display_num:
@@ -200,6 +204,8 @@ class WebRouteListing(RouteListing):
         if not match:
             raise AttributeError
         self.number, path = match.group(1), match.group(2)
+        if agency == 'E':
+            self.et_link_num = match.group(3)
         self.is_dart = False
         if 'Line' in self.number:
             self.number = self.number[0]
@@ -328,6 +334,18 @@ def main():
         except AttributeError:
             continue
 
+    with open(ET_PATH, 'r') as f:
+            scan = f.read()
+    options = scan.split('\n')
+    pattern = re.compile('(\\d*),(.*,.*),(\\d*)')
+    for o in options:
+        try:
+            rl = WebRouteListing(o, pattern, ',', 'E')
+            rl.find_image(images)
+            route_listings.append(rl)
+        except AttributeError:
+            continue
+
     html_ct = fetch_file(HTML_CT_URL)
     scan = html_ct.partition(HTML_CT_TRIM[0])[2].partition(HTML_CT_TRIM[1])[0]
     options = scan.split('},{')
@@ -363,7 +381,7 @@ def main():
     fp.write(FINAL_HTML % (
         completenessHTML(route_listings),
         ''.join([rl.to_html() for rl in route_listings]),
-        *NOTES))
+        NOTES))
     fp.close()
 
 if __name__ == '__main__':
