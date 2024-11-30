@@ -7,9 +7,10 @@ A tracker website for riding every bus in King County Metro, Sound Transit, Ever
 This website has an odd structure, because the page's HTML cannot be created on the fly by a JavaScript program. This is because the file creation dates for the images used to generate the page are only stored locally, not on GitHub or other services. So, the necessary format of this project is a collection of images taken on a phone at various times, transferred to a computer, cropped to 500x500 manually to preserve the creation dates, and saved in a folder. Then, a "compiler" of sorts, written in Python, creates the static HTML page (showing completed and incomplete buses) which can be pushed/uploaded to a hosting platform with the new images so the page displays. This compiler scrapes transit agency websites for up-to-date route data when run, though which URLs to check and the format of the data can be very hardcoded and finnicky.
 
 Unfortunately, Everett Transit's website lacks any form of plaintext representation of routes' terminals. As such, the possible options were:
-- Include a PDF parsing library as a dependency to scrape Everett Transit's PDF route listing manual (which would need to be downloaded)
-- Use a third-party website listing these routes in plain HTML (which was avoided for other transit agencies)
-- Include a .csv file in this repository with Everett Transit's route data, which would need to be manually updated
+- Including a PDF parsing library as a dependency to scrape Everett Transit's PDF route listing manual (which would need to be downloaded).
+- Using a third-party website listing these routes in plain HTML (which was avoided for other transit agencies).
+- Including a .csv file in this repository with Everett Transit's route data, which would need to be manually updated.
+
 Of these, the third option seemed most within the spirit of the project.
 
 The [images](images) folder contains real photographs of buses for each route, taken before, during, or after transportation. Capturing pedestrians in photos was avoided, but inevitable; as there is no reasonable expectation of privacy here, though, this is legal. If you want to try this challenge yourself, though, replacing the contents of the images folder with your own 500x500 .jpg images and then running `python3 html_compiler.py` from the project directory should produce a corresponding index.html file.
