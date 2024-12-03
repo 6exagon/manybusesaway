@@ -111,7 +111,9 @@ class RouteListing:
                 self.css_class = 'special'
         else:
             if 'DART' in self.number:
+                # Note that 775 is not DART but needs DART palette
                 self.css_class = 'K7'
+                self.number = self.number.replace(' ', '')
             else:
                 self.css_class = 'rapidride'
         self.start = ''
@@ -139,8 +141,8 @@ class RouteListing:
             + ' ⬌ ' + self.finish
     def link(self, param):
         '''Adds the correct HTML link to string text, with param in URL.'''
-        if self.nonexistence:
-            return ''
+        if self.nonexistence or self.agency == 'X':
+            return None
         elif self.agency == 'S':
             return ST_ROUTE_LINK % (self.number, param)
         elif self.agency == 'E':
@@ -175,7 +177,8 @@ class RouteListing:
             'K': KCM_ROUTE_OPTIONS,
             'S': ST_ROUTE_OPTIONS,
             'E': ET_ROUTE_OPTIONS,
-            'C': CT_ROUTE_OPTIONS}[self.agency]
+            'C': CT_ROUTE_OPTIONS,
+            'X': (None, None, None)}[self.agency]
         display_num = self.number
         if 'DART' in display_num:
             display_num = '<p class="dart">DART</p>' + display_num.lstrip('DART')
@@ -209,13 +212,9 @@ class WebRouteListing(RouteListing):
         self.is_dart = False
         if 'Line' in self.number:
             self.number = self.number[0]
-        elif 'DART' in self.number:
-            # Note that 775 is not DART but needs DART palette, so this is a fix
-            self.css_class = 'K7'
-            self.number = self.number.replace(' ', '')
         elif 'Shuttle' in self.number:
             self.number = self.number.rstrip(' Shuttle')
-        elif not self.number.isnumeric():
+        elif 'DART' not in self.number and not self.number.isnumeric():
             raise AttributeError        # Do not include Water Taxi, etc. here
         super().__init__(self.number, agency)
         self.set_terminals(path, delimiter)

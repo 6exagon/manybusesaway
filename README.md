@@ -10,6 +10,7 @@ Unfortunately, Everett Transit's website lacks any form of plaintext representat
 - Including a PDF parsing library as a dependency to scrape Everett Transit's PDF route listing manual (which would need to be downloaded).
 - Using a third-party website listing these routes in plain HTML (which was avoided for other transit agencies).
 - Including a .csv file in this repository with Everett Transit's route data, which would need to be manually updated.
+- Leaving the routes' terminals blank.
 
 Of these, the third option seemed most within the spirit of the project.
 
@@ -23,11 +24,11 @@ In September 2024, all transit agencies updated their routes, adding new routes 
 
 In October 2024, the git and GitHub repository for this project was created (after updates to get the compiler working with the updated transit websites), in time to track changes in a major update to include Everett Transit and Community Transit. Such is the reason behind code-related commits in this repository. The old HTML compiler from before September 2024 is not preserved in any form.
 
-In summary, all King County Metro Transit and Sound Transit buses before September 2024 are included in this project, and all King County Metro Transit, Sound Transit, Everett Transit, and Community Transit buses from after this point are also included. In addition, some included edge cases (see below) were formerly not included.
+In summary, all King County Metro Transit and Sound Transit buses before September 2024 are included in this project, and all King County Metro Transit, Sound Transit, Everett Transit, and Community Transit buses from after this point are also included. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project, they have been revisited since December 2024 to obtain satisfactory photographs.
 
 ### Edge Cases
 
-Most buses are straightfowardly from one of the four transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus. Transportation methods not seemingly classified as buses and found in the same listings (Sounder, Vanpool, etc.) are not included.
+Most buses are straightfowardly from one of the four transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus. Transportation methods not seemingly classified as buses and found in the same listings (Sounder, Vanpool, Ferry, etc.) are not included.
 
 King County Metro Transit:
 - `90` is the King County Metro Transit snow shuttle, only operational during deep snow. It has not been operational since this challenge was started, but it may yet be.
