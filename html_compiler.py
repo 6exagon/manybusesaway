@@ -103,6 +103,7 @@ class RouteListing:
             # Here begin a bunch of edge cases
             if agency == 'X':
                 self.css_class = 'nonbus'
+                self.agency = 'K'
             if self.css_class == 'C4':
                 self.css_class = 'C9'
             elif self.css_class == 'C5':
@@ -123,7 +124,7 @@ class RouteListing:
         Returns position in ordering on website, sensitive to order of transit
         agencies and special route status.
         '''
-        basenum = 'KSECX'.index(self.agency) * 2000
+        basenum = 'KSEC'.index(self.agency) * 2000
         if not self.number.isnumeric():
             if 'DART' in self.number:
                 return basenum + int(self.number.lstrip('DART'))
@@ -141,7 +142,7 @@ class RouteListing:
             + ' ⬌ ' + self.finish
     def link(self, param):
         '''Adds the correct HTML link to string text, with param in URL.'''
-        if self.nonexistence or self.agency == 'X':
+        if self.nonexistence or self.css_class == 'nonbus':
             return None
         elif self.agency == 'S':
             return ST_ROUTE_LINK % (self.number, param)
@@ -177,8 +178,7 @@ class RouteListing:
             'K': KCM_ROUTE_OPTIONS,
             'S': ST_ROUTE_OPTIONS,
             'E': ET_ROUTE_OPTIONS,
-            'C': CT_ROUTE_OPTIONS,
-            'X': (None, None, None)}[self.agency]
+            'C': CT_ROUTE_OPTIONS}[self.agency]
         display_num = self.number
         if 'DART' in display_num:
             display_num = '<p class="dart">DART</p>' + display_num.lstrip('DART')
@@ -364,7 +364,7 @@ def main():
         temp = i.rstrip('.jpg').lstrip('*')
         rl = RouteListing(temp[1:], temp[0])
         rl.nonexistence = i.startswith('*') + 1
-        if rl.agency == 'X' and rl.nonexistence == 1:
+        if rl.css_class == 'nonbus':
             rl.nonexistence = 0
         rl.img = i
         if rl.css_class in ('K8', 'K9'):

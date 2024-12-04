@@ -28,19 +28,23 @@ In summary, all King County Metro Transit and Sound Transit buses before Septemb
 
 ### Edge Cases
 
-Most buses are straightfowardly from one of the four transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus. Transportation methods not seemingly classified as buses and found in the same listings (Sounder, Vanpool, Ferry, etc.) are not included.
+Most buses are straightfowardly from one of the four transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus. Transportation methods not seemingly classified as buses and found in the same listings (Vanpool, Ferry, etc.) are not included.
 
 King County Metro Transit:
 - `90` is the King County Metro Transit snow shuttle, only operational during deep snow. It has not been operational since this challenge was started, but it may yet be.
-- `96` is the Seattle Streetcar for First Hill.
+- `96` is the First Hill Seattle Streetcar.
 - `97` is the Link Shuttle, as a replacement for when Sound Transit Link trains are not operational.
-- `98` is the Seattle Streetcar for South Lake Union.
-- `599` is Link Line 1, and `600` is Link Line 2, though these are operated by Sound Transit.
+- `98` is the South Lake Union Seattle Streetcar.
+- `599` is the Link 1 Line, and `600` is the Link 2 Line, though these are operated by Sound Transit and included by name.
 - `627` and `629` are the Duvall to Monroe and Duvall to North Bend SVT Shuttles, respectively. Snoqualmie Valley Transportation is not included in this project, for a number of reasons (mainly lack of information and incomplete integration and numbering for other SVT routes).
 - `634` and `636` are the Trailhead Direct buses to the Issaquah Alps and Mount Si, respectively. These are seasonal.
 - `671` through `678` are the King County RapidRide A through H lines. These are included by letter rather than by number.
 - `973` and `975` are the King County Water Taxis to Vashon Island and West Seattle, respectively.
 - `893`, `895`, and `981` through `994` are buses serving high schools in King County, managed by King County Metro Transit. Per the [Lakeside School website](https://www.lakesideschool.org/about-us/transportation), it is permissible to ride these as a non-student.
+
+Sound Transit:
+- The Link 1 Line, 2 Line, and T Line are all included by name.
+- The Sounder N Line and S Line are both included by name.
 
 Community Transit:
 - `701`, `702`, and `703` are Swift Blue, Green, and Orange, respectively. These are included by number rather than by name.

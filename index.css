@@ -67,8 +67,8 @@ img:hover {
 .n-schools {background-color: #bfcfcf;}
 .b-special {background-color: #a69608;}
 .n-special {background-color: #bfb44d;}
-.b-nonbus {background-color: #2faf2f;}
-.n-nonbus {background-color: #7fff7f;}
+.b-nonbus {background-color: #76bdf0; color: white}
+.n-nonbus {background-color: #a5d0e9;}
 
 .b-K0 {background-color: #0a664f; color: white}
 .n-K0 {background-color: #62b39d;}
