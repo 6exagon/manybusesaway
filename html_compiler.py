@@ -111,14 +111,17 @@ class RouteListing:
             elif self.css_class == 'K0' and num in range(90, 100):
                 self.css_class = 'special'
         else:
-            if 'DART' in self.number:
-                # Note that 775 is not DART but needs DART palette
+            if self.number.startswith('DART'):
+                # 775 must have DART palette, and so K7 is used for DART buses
                 self.css_class = 'K7'
-                self.number = self.number.replace(' ', '')
+            elif self.agency == 'S':
+                # Trains are all S0 palette
+                self.css_class = 'S0'
             else:
                 self.css_class = 'rapidride'
         self.start = ''
         self.finish = ''
+        self.position = self.position() # Precomputing this speeds up sorting
     def position(self):
         '''
         Returns position in ordering on website, sensitive to order of transit
@@ -126,7 +129,7 @@ class RouteListing:
         '''
         basenum = 'KSEC'.index(self.agency) * 2000
         if not self.number.isnumeric():
-            if 'DART' in self.number:
+            if self.number.startswith('DART'):
                 return basenum + int(self.number.lstrip('DART'))
             return basenum - 256 + ord(self.number[0])
         return basenum + int(self.number)
@@ -135,17 +138,18 @@ class RouteListing:
         Returns whether self is less than RouteListing other, for purposes of
         comparison.
         '''
-        return self.position() < other.position()
+        return self.position < other.position
     def __str__(self):
         '''Returns string representation of self, for debugging purposes.'''
         return self.number.ljust(8) + self.css_class + ' ' + self.start\
-            + ' ⬌ ' + self.finish
+            + ' ⬌ ' + self.finish + ' (' + self.agency + ')'
     def link(self, param):
         '''Adds the correct HTML link to string text, with param in URL.'''
         if self.nonexistence or self.css_class == 'nonbus':
             return None
         elif self.agency == 'S':
-            return ST_ROUTE_LINK % (self.number, param)
+            return ST_ROUTE_LINK\
+                % (self.number + '-line' * (self.css_class == 'S0'), param)
         elif self.agency == 'E':
             return ET_ROUTE_LINK % (self.et_link_num, param)
         elif self.agency == 'C':
@@ -179,13 +183,15 @@ class RouteListing:
             'S': ST_ROUTE_OPTIONS,
             'E': ET_ROUTE_OPTIONS,
             'C': CT_ROUTE_OPTIONS}[self.agency]
-        display_num = self.number
-        if 'DART' in display_num:
-            display_num = '<p class="dart">DART</p>' + display_num.lstrip('DART')
+        dnum = self.number
+        if self.number.startswith('DART'):
+            dnum = '<p class="dart">DART</p>' + dnum.lstrip('DART')
+        elif self.css_class == 'S0':
+            dnum = '<span class="circle c%s">%s</span>' % (dnum, dnum)
         elif self.css_class == 'C7':
-            display_num = '<p class="swift">Swift</p>' + display_num
+            dnum = '<p class="swift">Swift</p>' + dnum
         return ROW_HTML % (
-            td('b-' + self.css_class, display_num, self.link(params[0])),
+            td('b-' + self.css_class, dnum, self.link(params[0])),
             td('n-' + self.css_class, self.start, self.link(params[1])),
             td('n-' + self.css_class, self.finish, self.link(params[2])),
             td(*note),
@@ -209,14 +215,13 @@ class WebRouteListing(RouteListing):
         self.number, path = match.group(1), match.group(2)
         if agency == 'E':
             self.et_link_num = match.group(3)
-        self.is_dart = False
-        if 'Line' in self.number:
-            self.number = self.number[0]
-        elif 'Shuttle' in self.number:
+        if self.number.endswith('Line'):
+            self.number = self.number.rstrip(' Line')[-1]
+        elif self.number.endswith('Shuttle'):
             self.number = self.number.rstrip(' Shuttle')
-        elif 'DART' not in self.number and not self.number.isnumeric():
+        elif not self.number.startswith('DART') and not self.number.isnumeric():
             raise AttributeError        # Do not include Water Taxi, etc. here
-        super().__init__(self.number, agency)
+        super().__init__(self.number.replace(' ', ''), agency)
         self.set_terminals(path, delimiter)
         self.nonexistence = 0           # This is true for all WebRouteListings
     def set_terminals(self, path, delimiter):
@@ -324,7 +329,7 @@ def main():
     html_st = fetch_file(HTML_ST_URL)
     scan = html_st.partition(HTML_ST_TRIM[0])[2].partition(HTML_ST_TRIM[1])[0]
     options = [in_angles.sub('', x) for x in scan.split('</li><li>')]
-    pattern = re.compile('(\\d*)\\s\\((.*)\\).*\\n?')
+    pattern = re.compile('(.*)\\s\\((.*)\\).*\\n?')
     for o in options:
         try:
             rl = WebRouteListing(o, pattern, '- ', 'S')

@@ -24,7 +24,7 @@ In September 2024, all transit agencies updated their routes, adding new routes 
 
 In October 2024, the git and GitHub repository for this project was created (after updates to get the compiler working with the updated transit websites), in time to track changes in a major update to include Everett Transit and Community Transit. Such is the reason behind code-related commits in this repository. The old HTML compiler from before September 2024 is not preserved in any form.
 
-In summary, all King County Metro Transit and Sound Transit buses before September 2024 are included in this project, and all King County Metro Transit, Sound Transit, Everett Transit, and Community Transit buses from after this point are also included. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project, they have been revisited since December 2024 to obtain satisfactory photographs.
+In summary, all King County Metro Transit and Sound Transit buses before September 2024 are included in this project, and all King County Metro Transit, Sound Transit, Everett Transit, and Community Transit buses from after this point are also included. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project (for example, the Link 2 Line at its opening), they have been revisited since December 2024 to obtain satisfactory photographs.
 
 ### Edge Cases
 

@@ -46,11 +46,8 @@ td:nth-child(1) {
     font-family: "Trebuchet MS", sans-serif;
     font-size: 22px;
 }
-td:nth-child(1):hover {color: blue; cursor: pointer;}
-td:nth-child(2) {font-style: italic; width: 340px;}
-td:nth-child(2):hover {color: blue; cursor: pointer;}
-td:nth-child(3) {font-style: italic; width: 340px;}
-td:nth-child(3):hover {color: blue; cursor: pointer;}
+td:nth-child(1):hover, td:nth-child(2):hover, td:nth-child(3):hover {color: blue; cursor: pointer;}
+td:nth-child(2), td:nth-child(3) {font-style: italic; width: 340px;}
 td:nth-child(4) {text-align: center; width: 100px;}
 td:nth-child(5) {text-align: center; width: 160px;}
 td:nth-child(6) {padding: 0px; line-height: 0; height: 100px;}
@@ -80,13 +77,15 @@ img:hover {
 .n-K3 {background-color: #7acccb;}
 .b-K7 {background-color: #13006a; color: white}
 .n-K7 {background-color: #7370c0;}
+.b-S0 {background-color: #002670;}
+.n-S0 {background-color: #dcdce0;}
 .b-S5 {background-color: #f0f0ff;}
 .n-S5 {background-color: #c7d8f5;}
 .b-E0 {background-color: #ef0000;}
 .n-E0 {background-color: #97a2a9;}
 .b-C1 {background-color: #0081e0;}
 .n-C1 {background-color: #b9dffa;}
-.b-C2 {background-color: #0056c3; color : white}
+.b-C2 {background-color: #0056c3; color: white}
 .n-C2 {background-color: #74adf7;}
 .b-C7 {background-color: #00b332;}
 .n-C7 {background-color: #a1e6a5;}
@@ -102,6 +101,19 @@ img:hover {
     margin: -2px;
     letter-spacing: 0.06rem;
 }
+.circle {
+    display: block;
+    height: 30px;
+    width: 30px;
+    text-align: center;
+    line-height: 30px;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+.cN, .cS {background-color: #9ab6d3;}
+.cT {background-color: #f38b00;}
+.c1 {background-color: #3dae2b; color: white}
+.c2 {background-color: #00a0df; color: white}
 .swift {
     color: #0060d0;
     font-style: italic;
