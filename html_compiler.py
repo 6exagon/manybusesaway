@@ -33,6 +33,10 @@ HTML_ST_TRIM = (
     '</li></ul></div>')
 # No plaintext route terminals available anywhere on ET website officially
 ET_PATH = 'everett_transit.csv'
+HTML_PT_URL = 'https://piercetransit.org/'
+HTML_PT_TRIM= (
+    'Select Pierce Transit Route HERE</option>',
+    '</select>')
 HTML_CT_URL = 'https://www.communitytransit.org/maps-and-schedules/'\
     + 'maps-and-schedules-by-route'
 HTML_CT_TRIM = (
@@ -71,11 +75,13 @@ ST_ROUTE_LINK = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s
 ST_ROUTE_OPTIONS = ('', '?direction=1', '?direction=0')
 ET_ROUTE_LINK = 'https://everetttransit.org/DocumentCenter/View/%s#page=%s'
 ET_ROUTE_OPTIONS = ('1', '2', '2')
+# PT needs no link-building; links are included in the HTML
 CT_ROUTE_LINK = 'https://www.communitytransit.org/route/%s%s/table'
 CT_ROUTE_OPTIONS = ('', '/0', '')
+NONE_OPTIONS = (None, None, None)       # This is for efficiency
 
-NOTES = '''Only current King County Metro, Sound Transit, Everett Transit, and
- Community Transit routes are included.<br>
+NOTES = '''Only current King County Metro, Sound Transit, Everett Transit,
+ Pierce Transit, and Community Transit routes are included.<br>
 King County Metro and Sound Transit routes from immediately before the
  September 2024 service change are also included.<br>
 Routes with <span class="discontinued">Discontinued</span> tag have been
@@ -104,12 +110,14 @@ class RouteListing:
             if agency == 'X':
                 self.css_class = 'nonbus'
                 self.agency = 'K'
-            if self.css_class == 'C4':
+            elif self.css_class == 'K0' and num in range(90, 100):
+                self.css_class = 'special'
+            elif agency == 'P':
+                self.css_class = 'P'
+            elif self.css_class == 'C4':
                 self.css_class = 'C9'
             elif self.css_class == 'C5':
                 raise AttributeError    # These routes shown by ST and CT both
-            elif self.css_class == 'K0' and num in range(90, 100):
-                self.css_class = 'special'
         else:
             if self.number.startswith('DART'):
                 # 775 must have DART palette, and so K7 is used for DART buses
@@ -117,6 +125,8 @@ class RouteListing:
             elif self.agency == 'S':
                 # Trains are all S0 palette
                 self.css_class = 'S0'
+            elif self.number == 'Stream':
+                self.css_class = 'P'
             else:
                 self.css_class = 'rapidride'
         self.start = ''
@@ -127,7 +137,7 @@ class RouteListing:
         Returns position in ordering on website, sensitive to order of transit
         agencies and special route status.
         '''
-        basenum = 'KSEC'.index(self.agency) * 2000
+        basenum = 'KSEPC'.index(self.agency) * 2000
         if not self.number.isnumeric():
             if self.number.startswith('DART'):
                 return basenum + int(self.number.lstrip('DART'))
@@ -144,31 +154,22 @@ class RouteListing:
         return self.number.ljust(8) + self.css_class + ' ' + self.start\
             + ' ⬌ ' + self.finish + ' (' + self.agency + ')'
     def link(self, param):
-        '''Adds the correct HTML link to string text, with param in URL.'''
-        if self.nonexistence or self.css_class == 'nonbus':
-            return None
-        elif self.agency == 'S':
-            return ST_ROUTE_LINK\
-                % (self.number + '-line' * (self.css_class == 'S0'), param)
-        elif self.agency == 'E':
-            return ET_ROUTE_LINK % (self.et_link_num, param)
-        elif self.agency == 'C':
-            return CT_ROUTE_LINK % (self.number, param)
-        elif self.css_class == 'rapidride':
-            return KCM_ROUTE_LINK % (self.number + '-line', param)
-        else:
-            return KCM_ROUTE_LINK % (self.number.lstrip('DART').zfill(3), param)
+        '''
+        This will be overridden by WebRouteListing.
+        Thus, if routes are only found through images, they should have none.
+        '''
+        return None
     def to_html(self):
         '''
         Returns this row's <tr> HTML element for the final table.
         This isn't the most elegant way to handle CSS classes when writing HTML
         by hand, but it is more simple when generating it.
         '''
-        note = ('none', '')
-        if self.nonexistence == 1:
-            note = ('discontinued', 'Discontinued')
-        elif self.nonexistence == 2:
-            note = ('delisted', 'Delisted')
+        # More notes may be needed in the future
+        note = (
+            ('none', ''),
+            ('discontinued', 'Discontinued'),
+            ('delisted', 'Delisted'))[self.nonexistence]
         if self.img:
             i_link = IMG_LINK % self.img
             i_td = td(
@@ -178,10 +179,11 @@ class RouteListing:
                 False)
         else:
             i_td = td('none', '')
-        params = {
+        q = {
             'K': KCM_ROUTE_OPTIONS,
             'S': ST_ROUTE_OPTIONS,
             'E': ET_ROUTE_OPTIONS,
+            'P': NONE_OPTIONS,
             'C': CT_ROUTE_OPTIONS}[self.agency]
         dnum = self.number
         if self.number.startswith('DART'):
@@ -190,10 +192,20 @@ class RouteListing:
             dnum = '<span class="circle c%s">%s</span>' % (dnum, dnum)
         elif self.css_class == 'C7':
             dnum = '<p class="swift">Swift</p>' + dnum
+        elif self.number == 'Stream':
+            dnum = '<p class="smallnum">Stream</p>'
+        if self.start != self.finish:
+            return ROW_HTML % (
+                td('b-' + self.css_class, dnum, self.link(q[0])),
+                td('dest n-' + self.css_class, self.start, self.link(q[1])),
+                td('dest n-' + self.css_class, self.finish, self.link(q[2])),
+                td(*note),
+                td('complete' if self.img else 'incomplete', self.datetime),
+                i_td)
         return ROW_HTML % (
-            td('b-' + self.css_class, dnum, self.link(params[0])),
-            td('n-' + self.css_class, self.start, self.link(params[1])),
-            td('n-' + self.css_class, self.finish, self.link(params[2])),
+            td('b-' + self.css_class, dnum, self.link(q[0])),
+            td('dest n-' + self.css_class, self.start, self.link(q[1]), span=True),
+            '',
             td(*note),
             td('complete' if self.img else 'incomplete', self.datetime),
             i_td)
@@ -212,35 +224,48 @@ class WebRouteListing(RouteListing):
         match = pattern.fullmatch(string)
         if not match:
             raise AttributeError
-        self.number, path = match.group(1), match.group(2)
         if agency == 'E':
+            self.number, path = match.group(1), match.group(2)
             self.et_link_num = match.group(3)
+        elif agency == 'P':
+            self.pt_link = match.group(1)
+            self.number, path = match.group(2), match.group(3)
+        else:
+            self.number, path = match.group(1), match.group(2)
         if self.number.endswith('Line'):
             self.number = self.number.rstrip(' Line')[-1]
         elif self.number.endswith('Shuttle'):
             self.number = self.number.rstrip(' Shuttle')
+        elif self.number == 'Stream':
+            path = 'Tacoma - Spanaway'  # This is not listed for some reason
         elif not self.number.startswith('DART') and not self.number.isnumeric():
             raise AttributeError        # Do not include Water Taxi, etc. here
         super().__init__(self.number.replace(' ', ''), agency)
         self.set_terminals(path, delimiter)
-        self.nonexistence = 0           # This is true for all WebRouteListings
+        self.nonexistence = 0           # Obviously true for WebRouteListings
     def set_terminals(self, path, delimiter):
         '''
         Called from constructor, sets self.start and self.finish given string
         path (list of destinations, separated by string delimiter).
         '''
-        match = re.match('Service between (.*) and (the | )(.*)', path)
-        if match:                       # Catches King County edge case
-            self.start, self.finish = match.group(1), match.group(3)
-        else:
+        # Catches King County edge cases
+        if self.agency == 'K':
+            match = re.match('Service between (.*) and (the | )(.*)', path)
+            if match:
+                self.start, self.finish = match.group(1), match.group(3)
+                return
             destinations = path.split(delimiter)
             if destinations[0].startswith('Serves'):
                 del destinations[0]
                 self.css_class = 'schools'
                 if 'School' in destinations[0]:
-                    del destinations[0] # Catches King County edge case
+                    del destinations[0]
             self.start = destinations[0].lstrip().rstrip()
             self.finish = destinations[-1].lstrip().rstrip()
+            return
+        destinations = path.split(delimiter)
+        self.start = destinations[0].lstrip().rstrip()
+        self.finish = destinations[-1].lstrip().rstrip()
     def find_image(self, images):
         '''
         Sets self.img and self.datetime by checking images
@@ -254,6 +279,21 @@ class WebRouteListing(RouteListing):
         else:
             self.img = None
             self.datetime = 'Incomplete'
+    def link(self, param):
+        '''Adds the correct HTML link to string text, with param in URL.'''
+        if self.agency == 'S':
+            return ST_ROUTE_LINK\
+                % (self.number + '-line' * (self.css_class == 'S0'), param)
+        elif self.agency == 'E':
+            return ET_ROUTE_LINK % (self.et_link_num, param)
+        elif self.agency == 'P':
+            return self.pt_link
+        elif self.agency == 'C':
+            return CT_ROUTE_LINK % (self.number, param)
+        elif self.css_class == 'rapidride':
+            return KCM_ROUTE_LINK % (self.number + '-line', param)
+        else:
+            return KCM_ROUTE_LINK % (self.number.lstrip('DART').zfill(3), param)
 
 def fetch_file(url):
     '''Given string url, returns contents of file fetched from it in UTF-8.'''
@@ -261,18 +301,20 @@ def fetch_file(url):
     with urllib.request.urlopen(r) as file:
         return file.read().decode('utf8')
 
-def td(css_class, data, link=None, blank=True):
+def td(css_class, data, link=None, blank=True, span=False):
     '''
     Returns <td> HTML element given css_class, text/image data, and link.
     If link should open in same tab, blank should be False.
     '''
+    colspan = span * ' colspan="2"'
     if not link:
-        return '<td class="%s">%s</td>' % (css_class, data)
+        return '<td class="%s"%s>%s</td>' % (css_class, colspan, data)
     if blank:
         jsfunc = 'window.open(\'%s\', \'_blank\')' % link
     else:
         jsfunc = 'window.open(\'%s\', \'_self\')' % link
-    return '<td class="%s" onclick="%s">%s</td>' % (css_class, jsfunc, data)
+    return '<td class="%s" onclick="%s"%s>%s</td>'\
+        % (css_class, jsfunc, colspan, data)
 
 def completenessHTML(route_listings):
     '''
@@ -350,6 +392,24 @@ def main():
         except AttributeError:
             continue
 
+    html_pt = fetch_file(HTML_PT_URL)
+    scan = html_pt.partition(HTML_PT_TRIM[0])[2].partition(HTML_PT_TRIM[1])[0]
+    options = scan.split('\n')
+    pattern = re.compile('.*value="(.*)">Route (\\d*) \\|? (.*)</option>')
+    streampattern = re.compile('.*value="(.*)">(Stream)().*</option>')
+    for o in options:
+        try:
+            rl = WebRouteListing(o, pattern, '-', 'P')
+            rl.find_image(images)
+            route_listings.append(rl)
+        except AttributeError:
+            try:
+                rl = WebRouteListing(o, streampattern, '-', 'P')
+                rl.find_image(images)
+                route_listings.append(rl)
+            except AttributeError:
+                continue
+
     html_ct = fetch_file(HTML_CT_URL)
     scan = html_ct.partition(HTML_CT_TRIM[0])[2].partition(HTML_CT_TRIM[1])[0]
     options = scan.split('},{')
@@ -372,7 +432,7 @@ def main():
         if rl.css_class == 'nonbus':
             rl.nonexistence = 0
         rl.img = i
-        if rl.css_class in ('K8', 'K9'):
+        if rl.css_class in ('K8', 'K9') and not rl.number.startswith('DART'):
             rl.css_class = 'schools'    # Cannot check for "Serves" if absent
         secs = os.stat(os.path.join(IMG_PATH, i)).st_birthtime
         rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
