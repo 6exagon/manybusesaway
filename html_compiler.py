@@ -31,7 +31,7 @@ HTML_ST_TRIM = (
     '<p>To print or download individual route schedules and maps click the '\
     + 'PDF.</p><ul><li>',
     '</li></ul></div>')
-# No plaintext route terminals available anywhere on ET website officially
+# No plaintext route termini available anywhere on ET website officially
 ET_PATH = 'everett_transit.csv'
 HTML_PT_URL = 'https://piercetransit.org/'
 HTML_PT_TRIM= (
@@ -241,9 +241,9 @@ class WebRouteListing(RouteListing):
         elif not self.number.startswith('DART') and not self.number.isnumeric():
             raise AttributeError        # Do not include Water Taxi, etc. here
         super().__init__(self.number.replace(' ', ''), agency)
-        self.set_terminals(path, delimiter)
+        self.set_termini(path, delimiter)
         self.nonexistence = 0           # Obviously true for WebRouteListings
-    def set_terminals(self, path, delimiter):
+    def set_termini(self, path, delimiter):
         '''
         Called from constructor, sets self.start and self.finish given string
         path (list of destinations, separated by string delimiter).
