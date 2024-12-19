@@ -3,49 +3,57 @@ This program is used to generate an HTML file to display completed buses.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
 file modification dates for photographs (lost when uploading to webhosting or
 GitHub) are needed to render the page.
-However, this progam is not standalone; it requires aforementioned photographs
-(when they exist) to be inside a "./images" folder in the current working
-directory.
-This allows each type of route to have its own color scheme, among other things.
 See README.md for more details.
 '''
 
 import os
 import re
-import urllib.request
+from urllib import request
+import json
 from datetime import datetime
-import time
+from time import time
 
 # Current King County Metro URL, may be subject to change in the future
-JS_KCM_URL = 'https://cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
+KCM_URL = 'https://cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
     + 'fe-apps/schedule/09142024/js/find-a-schedule-js.js'\
     + '?rev=b74ceeb7db85476cb2f92719c10e956f'
-JS_KCM_TRIM = (
-    '<option value="" selected="">Enter route or location</option>\\n    ',
-    '\\n  </select>\\n\\x3c!-- end route selector --')
-HTML_TROLLEY_URL = 'https://metro.kingcounty.gov/up/rr/m-trolley.html'
+TROLLEY_URL = 'https://metro.kingcounty.gov/up/rr/m-trolley.html'
 # This Sound Transit page's formatting is absolutely horrible and inconsistent,
 # but it's seemingly the best resource there is
-HTML_ST_URL = 'https://www.soundtransit.org/ride-with-us/schedules-maps'
-HTML_ST_TRIM = (
-    '<p>To print or download individual route schedules and maps click the '\
-    + 'PDF.</p><ul><li>',
-    '</li></ul></div>')
-# No plaintext route termini available anywhere on ET website officially
-ET_PATH = 'everett_transit.csv'
-HTML_PT_URL = 'https://piercetransit.org/'
-HTML_PT_TRIM= (
-    'Select Pierce Transit Route HERE</option>',
-    '</select>')
-HTML_CT_URL = 'https://www.communitytransit.org/maps-and-schedules/'\
+ST_URL = 'https://www.soundtransit.org/ride-with-us/schedules-maps'
+# This is used for Pierce Transit and Everett Transit routes
+# Though it could be, it is not used for other agencies
+# This is because it's less accurate and well-maintained as a source for them
+TRIPPLANNER_URL = 'https://tripplanner.kingcounty.gov/TI_FixedRoute_Line'
+# These next two links are also used, purely for the schedule links
+# They are inadequate for route descriptions
+ET_URL = 'https://everetttransit.org/101/Schedules'
+PT_URL = 'https://piercetransit.org/pierce-transit-routes/'
+CT_URL = 'https://www.communitytransit.org/maps-and-schedules/'\
     + 'maps-and-schedules-by-route'
-HTML_CT_TRIM = (
-    'var _routes = [{',
-    '}];')
+
+KCM_PATTERN = r'<option value="([^"]+)">((?:DART +)?[A-Z\d]+?)'\
+    + r'(?: Line| Shuttle)? - (.*?)<\/option>'
+ST_PATTERN = r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?'\
+    + r'(\d+|.)(?: Line)?.\(([^\)]*)\)'
+TRIPPLANNER_PATTERN = r'.*(?:[Tt]o|-) (.*?)(?: via .*)?'
+ET_PATTERN = r'<a href="([^"]+)".*>Route (\d+)<\/span><\/a>'
+PT_PATTERN = r'<a href="([^"]+)">(?:Route )?(Stream|\d+)[^<]*<\/a><\/div>'
+CT_PATTERN = r'"route_id":"(\d+)","route_name":"([^"]*)","route_short_name"'
 
 TIME_FORMAT = '%-m/%-d/%y %-H:%M'
-
 IMG_PATH = 'images'
+
+KCM_LINK_BASE = 'https://kingcounty.gov%s#%s'
+# Only reliable agency for directions corresponding to table, unfortunately
+KCM_LINK_OPTIONS = ('route-map', 'weekday', 'weekday-b')
+ST_LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
+ST_LINK_OPTIONS = ('', '?direction=1', '?direction=0')
+ET_LINK_BASE = '%s#page=%s'
+ET_LINK_OPTIONS = ('1', '2', '2')
+# PT allows no options; navigation is all done through JavaScript
+CT_LINK_BASE = 'https://www.communitytransit.org/route/%s%s'
+CT_LINK_OPTIONS = ('', '/table', '/0/table')
 
 FINAL_HTML = '''
 <!DOCTYPE html>
@@ -65,20 +73,8 @@ FINAL_HTML = '''
     </body>
 </html>'''
 ROW_HTML = '\n%s<tr>%s</tr>' % (' ' * 12, '%s' * 6)
-# The following are for clickable <td> sections opening new tabs
 IMG_LINK = IMG_PATH + '/%s'
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
-KCM_ROUTE_LINK = 'https://kingcounty.gov/en/dept/metro/routes-and-service/'\
-    + 'schedules-and-maps/%s.html#%s'
-KCM_ROUTE_OPTIONS = ('route-map', 'weekday', 'weekday-b')
-ST_ROUTE_LINK = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
-ST_ROUTE_OPTIONS = ('', '?direction=1', '?direction=0')
-ET_ROUTE_LINK = 'https://everetttransit.org/DocumentCenter/View/%s#page=%s'
-ET_ROUTE_OPTIONS = ('1', '2', '2')
-# PT needs no link-building; links are included in the HTML
-CT_ROUTE_LINK = 'https://www.communitytransit.org/route/%s%s/table'
-CT_ROUTE_OPTIONS = ('', '/0', '')
-NONE_OPTIONS = (None, None, None)       # This is for efficiency
 
 NOTES = '''Only current King County Metro, Sound Transit, Everett Transit,
  Pierce Transit, and Community Transit routes are included.<br>
@@ -96,11 +92,10 @@ and images.
 class RouteListing:
     def __init__(self, number, agency):
         '''
-        Sets up self from number and agency strings, This constructor is only
-        called directly from image-only setup. self.nonexistence is not set
-        here but by child class or by image setup.
+        Sets up self from number and agency strings. Plain RouteListings are
+        only created in image-only setup; WebRouteListings created elsewhere.
         '''
-        self.number = number
+        self.number = number.replace(' ', '')
         self.agency = agency
         if self.number.isnumeric():
             num = int(self.number)
@@ -129,9 +124,12 @@ class RouteListing:
                 self.css_class = 'P'
             else:
                 self.css_class = 'rapidride'
-        self.start = ''
-        self.finish = ''
         self.position = self.position() # Precomputing this speeds up sorting
+        # These four attributes are default values; they are usually set somehow
+        self.start = ''
+        self.dest = ''
+        self.links = (None, None, None)
+        self.nonexistence = 0
     def position(self):
         '''
         Returns position in ordering on website, sensitive to order of transit
@@ -151,19 +149,20 @@ class RouteListing:
         return self.position < other.position
     def __str__(self):
         '''Returns string representation of self, for debugging purposes.'''
-        return self.number.ljust(8) + self.css_class + ' ' + self.start\
-            + ' ⬌ ' + self.finish + ' (' + self.agency + ')'
-    def link(self, param):
-        '''
-        This will be overridden by WebRouteListing.
-        Thus, if routes are only found through images, they should have none.
-        '''
-        return None
+        return ' '.join((
+            'i–'[not self.img] + ' !*'[self.nonexistence],
+            self.agency,
+            self.number,
+            '(' + self.css_class + ')',
+            self.start,
+            '⬌',
+            self.dest))
     def to_html(self):
         '''
         Returns this row's <tr> HTML element for the final table.
         This isn't the most elegant way to handle CSS classes when writing HTML
         by hand, but it is more simple when generating it.
+        Handles special cases for visuals.
         '''
         # More notes may be needed in the future
         note = (
@@ -179,13 +178,8 @@ class RouteListing:
                 False)
         else:
             i_td = td('none', '')
-        q = {
-            'K': KCM_ROUTE_OPTIONS,
-            'S': ST_ROUTE_OPTIONS,
-            'E': ET_ROUTE_OPTIONS,
-            'P': NONE_OPTIONS,
-            'C': CT_ROUTE_OPTIONS}[self.agency]
         dnum = self.number
+        # These are for special visuals
         if self.number.startswith('DART'):
             dnum = '<p class="dart">DART</p>' + dnum.lstrip('DART')
         elif self.css_class == 'S0':
@@ -194,65 +188,30 @@ class RouteListing:
             dnum = '<p class="swift">Swift</p>' + dnum
         elif self.number == 'Stream':
             dnum = '<p class="smallnum">Stream</p>'
-        if self.start != self.finish:
-            return ROW_HTML % (
-                td('b-' + self.css_class, dnum, self.link(q[0])),
-                td('dest n-' + self.css_class, self.start, self.link(q[1])),
-                td('dest n-' + self.css_class, self.finish, self.link(q[2])),
-                td(*note),
-                td('complete' if self.img else 'incomplete', self.datetime),
-                i_td)
         return ROW_HTML % (
-            td('b-' + self.css_class, dnum, self.link(q[0])),
-            td('dest n-' + self.css_class, self.start, self.link(q[1]), span=True),
-            '',
+            td('b-' + self.css_class, dnum, self.links[0]),
+            td('n-' + self.css_class, self.start, self.links[1]),
+            td('n-' + self.css_class, self.dest, self.links[2]),
             td(*note),
             td('complete' if self.img else 'incomplete', self.datetime),
             i_td)
 
 '''
-This class extends RouteListing to automatically perform setup based on website
-data, calls RouteListing constructor after custom setup.
+This class extends RouteListing to include additional data from site listings.
+It inherits its constructor.
 '''
 class WebRouteListing(RouteListing):
-    def __init__(self, string, pattern, delimiter, agency):
+    def set_termini_from_path(self, path, delimiter):
         '''
-        Sets up self from route listing string string, using re.Pattern pattern
-        and string delimiter. Nonexistence flag is for main function to modify.
-        '''
-        string = string.replace('&amp;', '&').replace('–', '-').replace('\\', '')
-        match = pattern.fullmatch(string)
-        if not match:
-            raise AttributeError
-        if agency == 'E':
-            self.number, path = match.group(1), match.group(2)
-            self.et_link_num = match.group(3)
-        elif agency == 'P':
-            self.pt_link = match.group(1)
-            self.number, path = match.group(2), match.group(3)
-        else:
-            self.number, path = match.group(1), match.group(2)
-        if self.number.endswith('Line'):
-            self.number = self.number.rstrip(' Line')[-1]
-        elif self.number.endswith('Shuttle'):
-            self.number = self.number.rstrip(' Shuttle')
-        elif self.number == 'Stream':
-            path = 'Tacoma - Spanaway'  # This is not listed for some reason
-        elif not self.number.startswith('DART') and not self.number.isnumeric():
-            raise AttributeError        # Do not include Water Taxi, etc. here
-        super().__init__(self.number.replace(' ', ''), agency)
-        self.set_termini(path, delimiter)
-        self.nonexistence = 0           # Obviously true for WebRouteListings
-    def set_termini(self, path, delimiter):
-        '''
-        Called from constructor, sets self.start and self.finish given string
-        path (list of destinations, separated by string delimiter).
+        Sets self.start and self.dest given string path
+        (list of destinations, separated by string delimiter).
+        This could not be done with regular regex; more logic is needed.
         '''
         # Catches King County edge cases
         if self.agency == 'K':
-            match = re.match('Service between (.*) and (the | )(.*)', path)
+            match = re.match('Service between (.*) and (?:the | )(.*)', path)
             if match:
-                self.start, self.finish = match.group(1), match.group(3)
+                self.start, self.dest = match.group(1), match.group(2)
                 return
             destinations = path.split(delimiter)
             if destinations[0].startswith('Serves'):
@@ -261,11 +220,27 @@ class WebRouteListing(RouteListing):
                 if 'School' in destinations[0]:
                     del destinations[0]
             self.start = destinations[0].lstrip().rstrip()
-            self.finish = destinations[-1].lstrip().rstrip()
+            self.dest = destinations[-1].lstrip().rstrip()
             return
         destinations = path.split(delimiter)
         self.start = destinations[0].lstrip().rstrip()
-        self.finish = destinations[-1].lstrip().rstrip()
+        self.dest = destinations[-1].lstrip().rstrip()
+    def set_termini_from_iter(self, i, regex):
+        '''
+        Sets self.start and self.dest given iterable of strings with those
+        buried in redundant strings.
+        re.Pattern regex is used to extract single terminus from string.
+        This causes cryptic errors when imperfect regex is used to parse pages.
+        '''
+        self.start, self.dest = (regex.fullmatch(s).group(1) for s in i)
+    def set_links(self, linkbase, linkpiece, linkoptions):
+        '''
+        Sets tuple self.links to string linkbase formatted with string linkpiece
+        and each of the strings in tuple linkoptions.
+        This allows each td in this RouteListing's tr to have a different but
+        related link.
+        '''
+        self.links = tuple(linkbase % (linkpiece, o) for o in linkoptions)
     def find_image(self, images):
         '''
         Sets self.img and self.datetime by checking images
@@ -279,42 +254,36 @@ class WebRouteListing(RouteListing):
         else:
             self.img = None
             self.datetime = 'Incomplete'
-    def link(self, param):
-        '''Adds the correct HTML link to string text, with param in URL.'''
-        if self.agency == 'S':
-            return ST_ROUTE_LINK\
-                % (self.number + '-line' * (self.css_class == 'S0'), param)
-        elif self.agency == 'E':
-            return ET_ROUTE_LINK % (self.et_link_num, param)
-        elif self.agency == 'P':
-            return self.pt_link
-        elif self.agency == 'C':
-            return CT_ROUTE_LINK % (self.number, param)
-        elif self.css_class == 'rapidride':
-            return KCM_ROUTE_LINK % (self.number + '-line', param)
-        else:
-            return KCM_ROUTE_LINK % (self.number.lstrip('DART').zfill(3), param)
 
-def fetch_file(url):
-    '''Given string url, returns contents of file fetched from it in UTF-8.'''
-    r = urllib.request.Request(url, headers={'User-Agent': 'Magic Browser'})
-    with urllib.request.urlopen(r) as file:
-        return file.read().decode('utf8')
+def http_request(url, data=None):
+    '''
+    Given string url, returns result of HTTP request in UTF-8.
+    If dictionary data is specified, request will be POST, otherwise GET.
+    Sanitizes output.
+    '''
+    h = {'User-Agent': 'Magic Browser', 'Content-Type': 'application/json'}
+    if data:
+        d = str(json.dumps(data)).encode('utf8')
+        r = request.Request(url, method='POST', headers=h, data=d)
+    else:
+        r = request.Request(url, headers=h)
+    with request.urlopen(r) as file:
+        result = file.read().decode('utf8')
+        return result.replace('&amp;', '&').replace('–', '-').replace('\\', '')
 
-def td(css_class, data, link=None, blank=True, span=False):
+def td(css_class, data, link=None, blank=True):
     '''
     Returns <td> HTML element given css_class, text/image data, and link.
     If link should open in same tab, blank should be False.
     '''
-    colspan = span * ' colspan="2"'
     if not link:
-        return '<td class="%s"%s>%s</td>' % (css_class, colspan, data)
+        return '<td class="%s">%s</td>' % (css_class, data)
     if blank:
         jsfunc = 'window.open(\'%s\', \'_blank\')' % link
     else:
         jsfunc = 'window.open(\'%s\', \'_self\')' % link
-    return '<td class="%s" onclick="%s"%s>%s</td>'\
-        % (css_class, jsfunc, colspan, data)
+    return '<td class="%s" onclick="%s">%s</td>'\
+        % (css_class, jsfunc, data)
 
 def completenessHTML(route_listings):
     '''
@@ -323,7 +292,7 @@ def completenessHTML(route_listings):
     all non-snow-shuttle routes are complete, and returns Full Completeness
     heading when all routes are complete, with no exceptions.
     '''
-    dt = datetime.fromtimestamp(time.time()).strftime('%-m/%-d/%y')
+    dt = datetime.fromtimestamp(time()).strftime('%-m/%-d/%y')
     total = 0
     completed = 0
     can_fc = True
@@ -343,91 +312,85 @@ def completenessHTML(route_listings):
 def main():
     '''
     Entry point of program.
-    Gathers images that must be used, scrapes buses from both the Metro and
-    Sound Transit websites, creates route table.
+    Gathers images that must be used, scrapes buses from all transit agencies,
+    creates route table.
     '''
     in_angles = re.compile('<.*?>')
     route_listings = []
-    images = set()
-    for x in os.listdir(IMG_PATH):
-        if x.endswith('.jpg'):
-            images.add(x)
+    images = set(x for x in os.listdir(IMG_PATH) if x.endswith('jpg'))
 
-    js_metro = fetch_file(JS_KCM_URL)
-    scan = js_metro.partition(JS_KCM_TRIM[0])[2].partition(JS_KCM_TRIM[1])[0]
-    options = [in_angles.sub('', x) for x in scan.split('\\n    ')]
-    html_trolley = fetch_file(HTML_TROLLEY_URL)
-    pattern = re.compile('(.*) - (.*)')
-    for o in options:
-        try:
-            rl = WebRouteListing(o, pattern, ',', 'K')
-            rl.find_image(images)
-            if 'Route ' + rl.number in html_trolley:
-                rl.css_class = 'trolley'
-            route_listings.append(rl)
-        except AttributeError:
-            continue
+    js_kcm = http_request(KCM_URL)
+    html_trolley = http_request(TROLLEY_URL)
+    for m in re.finditer(re.compile(KCM_PATTERN), js_kcm):
+        rl = WebRouteListing(m.group(2), 'K')
+        rl.set_termini_from_path(m.group(3), ',')
+        rl.set_links(KCM_LINK_BASE, m.group(1), KCM_LINK_OPTIONS)
+        rl.find_image(images)
+        if 'Route ' + rl.number in html_trolley:
+            rl.css_class = 'trolley'
+        route_listings.append(rl)
 
-    html_st = fetch_file(HTML_ST_URL)
-    scan = html_st.partition(HTML_ST_TRIM[0])[2].partition(HTML_ST_TRIM[1])[0]
-    options = [in_angles.sub('', x) for x in scan.split('</li><li>')]
-    pattern = re.compile('(.*)\\s\\((.*)\\).*\\n?')
-    for o in options:
-        try:
-            rl = WebRouteListing(o, pattern, '- ', 'S')
-            rl.find_image(images)
-            route_listings.append(rl)
-        except AttributeError:
-            continue
+    html_st = http_request(ST_URL)
+    for m in re.finditer(re.compile(ST_PATTERN), html_st):
+        rl = WebRouteListing(m.group(2), 'S')
+        rl.set_termini_from_path(m.group(3), '-')
+        rl.set_links(ST_LINK_BASE, m.group(1), ST_LINK_OPTIONS)
+        rl.find_image(images)
+        route_listings.append(rl)
 
-    with open(ET_PATH, 'r') as f:
-            scan = f.read()
-    options = scan.split('\n')
-    pattern = re.compile('(\\d*),(.*,.*),(\\d*)')
-    for o in options:
-        try:
-            rl = WebRouteListing(o, pattern, ',', 'E')
-            rl.find_image(images)
-            route_listings.append(rl)
-        except AttributeError:
-            continue
+    # Only used for Pierce Transit and Everett Transit Routes
+    json_tripplanner = http_request(
+        TRIPPLANNER_URL,
+        {'version': '1.1', 'method': 'GetLines'})
+    tp_lines_list = json.loads(json_tripplanner)['result']['lines']
+    # This stores map of string rlid to generator over destination listings
+    tp_lines_dict = dict()
+    for i in tp_lines_list:
+        if i['agencyId'] == 'ET':
+            rlid = i['lineAbbr'][1:]
+            tp_lines_dict[rlid] = (x['signage'] for x in i['directions'])
+        elif i['agencyId'] == 'PT':
+            #i['name'] doesn't work for 497
+            dirs = tuple(x['signage'] for x in i['directions'])
+            rlid = 'P' + dirs[0].partition(' ')[0]
+            tp_lines_dict[rlid] = dirs
+    tp_p = re.compile(TRIPPLANNER_PATTERN)
 
-    html_pt = fetch_file(HTML_PT_URL)
-    scan = html_pt.partition(HTML_PT_TRIM[0])[2].partition(HTML_PT_TRIM[1])[0]
-    options = scan.split('\n')
-    pattern = re.compile('.*value="(.*)">Route (\\d*) \\|? (.*)</option>')
-    streampattern = re.compile('.*value="(.*)">(Stream)().*</option>')
-    for o in options:
-        try:
-            rl = WebRouteListing(o, pattern, '-', 'P')
-            rl.find_image(images)
-            route_listings.append(rl)
-        except AttributeError:
-            try:
-                rl = WebRouteListing(o, streampattern, '-', 'P')
-                rl.find_image(images)
-                route_listings.append(rl)
-            except AttributeError:
-                continue
+    html_et = http_request(ET_URL)
+    for m in re.finditer(re.compile(ET_PATTERN), html_et):
+        rl = WebRouteListing(m.group(2), 'E')
+        rl.set_termini_from_iter(tp_lines_dict.pop('E' + m.group(2)), tp_p)
+        # This error must be patched; again, Trip Planner data isn't great
+        if rl.number == '6':
+            rl.start = 'Waterfront'
+        rl.set_links(ET_LINK_BASE, m.group(1), ET_LINK_OPTIONS)
+        rl.find_image(images)
+        route_listings.append(rl)
 
-    html_ct = fetch_file(HTML_CT_URL)
-    scan = html_ct.partition(HTML_CT_TRIM[0])[2].partition(HTML_CT_TRIM[1])[0]
-    options = scan.split('},{')
-    pattern = re.compile(
-        '"route_id":"(\\d*)","route_name":"(.*)","route_short_name".*')
-    for o in options:
+    html_pt = http_request(PT_URL)
+    for m in re.finditer(re.compile(PT_PATTERN), html_pt):
+        rl = WebRouteListing(m.group(2), 'P')
+        rl.set_termini_from_iter(tp_lines_dict.pop('P' + m.group(2)), tp_p)
+        rl.links = tuple(m.group(1) for x in range(3))
+        rl.find_image(images)
+        route_listings.append(rl)
+
+    html_ct = http_request(CT_URL)
+    for m in re.finditer(re.compile(CT_PATTERN), html_ct):
         try:
-            rl = WebRouteListing(o, pattern, '|', 'C')
+            rl = WebRouteListing(m.group(1), 'C')
+            rl.set_termini_from_path(m.group(2), '|')
+            rl.set_links(CT_LINK_BASE, m.group(1), CT_LINK_OPTIONS)
             rl.find_image(images)
             route_listings.append(rl)
-        except AttributeError:
+        except AttributeError:          # Raised on Sound Transit duplicate
             continue
 
     # All remaining images are '*#.jpg' (delisted) or '#.jpg' (discontinued)
     while len(images):
         i = images.pop()
-        temp = i.rstrip('.jpg').lstrip('*')
-        rl = RouteListing(temp[1:], temp[0])
+        rlid = i.rstrip('.jpg').lstrip('*')
+        rl = RouteListing(rlid[1:], rlid[0])
         rl.nonexistence = i.startswith('*') + 1
         if rl.css_class == 'nonbus':
             rl.nonexistence = 0
@@ -437,7 +400,7 @@ def main():
         secs = os.stat(os.path.join(IMG_PATH, i)).st_birthtime
         rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
         if 'Route ' + rl.number in html_trolley:
-            rl.css_class = 'trolley'
+            rl.css_class = 'trolley'    # This is worth a shot
         route_listings.append(rl)
 
     route_listings.sort()
