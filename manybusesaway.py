@@ -1,9 +1,10 @@
 '''
+ManyBusesAway v3.2.b0
 This program is used to generate an HTML file to display completed buses.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
 file modification dates for photographs (lost when uploading to webhosting or
 GitHub) are needed to render the page.
-See README.md for more details.
+See project README.md for more details.
 '''
 
 import os
@@ -12,6 +13,8 @@ from urllib import request
 import json
 from datetime import datetime
 from time import time
+
+TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 
 # Current King County Metro URL, may be subject to change in the future
 KCM_URL = 'https://cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
@@ -41,7 +44,6 @@ ET_PATTERN = r'<a href="([^"]+)".*>Route (\d+)<\/span><\/a>'
 PT_PATTERN = r'<a href="([^"]+)">(?:Route )?(Stream|\d+)[^<]*<\/a><\/div>'
 CT_PATTERN = r'"route_id":"(\d+)","route_name":"([^"]*)","route_short_name"'
 
-TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 IMG_PATH = 'images'
 
 KCM_LINK_BASE = 'https://kingcounty.gov%s#%s'
@@ -62,7 +64,7 @@ FINAL_HTML = '''
         <meta charset="UTF-8">
         <link href="index.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" href="icon.ico">
-        <title>Completed Buses</title>
+        <title>ManyBusesAway</title>
     </head>
     <body>
         <h1>Completed Buses</h1>
@@ -70,6 +72,7 @@ FINAL_HTML = '''
         <table>%s
         </table>
         <p>%s</p>
+        <span class="credit" onclick="window.open(\'%s\', \'_blank\')">%s</span>
     </body>
 </html>'''
 ROW_HTML = '\n%s<tr>%s</tr>' % (' ' * 12, '%s' * 6)
@@ -315,7 +318,6 @@ def main():
     Gathers images that must be used, scrapes buses from all transit agencies,
     creates route table.
     '''
-    in_angles = re.compile('<.*?>')
     route_listings = []
     images = set(x for x in os.listdir(IMG_PATH) if x.endswith('jpg'))
 
@@ -408,7 +410,9 @@ def main():
     fp.write(FINAL_HTML % (
         completenessHTML(route_listings),
         ''.join([rl.to_html() for rl in route_listings]),
-        NOTES))
+        NOTES,
+        'https://github.com/6exagon/manybusesaway',
+        re.search(r'([^\s]*\sv\d\.\d\..*)\s', __doc__).group(1)))
     fp.close()
 
 if __name__ == '__main__':

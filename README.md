@@ -1,12 +1,22 @@
-# Completed Buses
+# ManyBusesAway
 
 A tracker website for riding every bus in King County Metro Transit, Sound Transit, Everett Transit, Pierce Transit, and Community Transit (transit agencies of Washington State, in the Greater Seattle area).
 
+This project takes its name from [OneBusAway](https://onebusaway.org), an app/website serving real-time bus tracking data used _extensively_ in planning journeys in advance and in real time, without which this project would have been impossible.
+
+### Website
+
+This website shows a table of all bus routes from the above transit agencies; see below for more details on which are included. If a route has been completed (by myself), its completion date and a legible photograph from which this is determined are shown. Otherwise, these spaces are blank.
+
+Click on the number of any active bus route to access its map (on its official site). Click on either of its termini to be brought to its schedule in the direction away from that terminus (also on its official site), though this is not always reliable due to inconsistencies within some transit agencies' websites. Click on its image if present to see the full-size image in your browser. Clicking has no effect when JavaScript is disabled.
+
 ### Structure
 
-This website has an odd structure, because its HTML cannot be created on the fly by JavaScript. This is because the file creation dates for the images used to generate the page are only stored locally, not on GitHub or other services. So, the necessary format of this project is a collection of photographs taken on a phone at various times, transferred to a computer, cropped to 500x500 manually to preserve the creation dates, and saved in a folder. Then, a "compiler" of sorts, written in Python, creates the static HTML page (showing completed and incomplete buses) which can be pushed/uploaded to a hosting platform with the new images so the page displays. This compiler scrapes official transit agency websites for up-to-date route data when run, though which URLs to use and the format of the data can be very hardcoded, finnicky, and inconsistent. The official King/Pierce County Trip Planner is also used (these seem to be using identical assets and code), as the Everett Transit and Pierce Transit official websites are lacking.
+This project has an odd structure, because the webpage's HTML cannot be created on the fly by JavaScript. This is because the file creation dates for the images used to generate the page are only stored locally, not on GitHub or other services. So, the necessary format of this project is a collection of photographs taken on a phone at various times, transferred to a computer, cropped to 500x500 manually to preserve the creation dates, and saved in a folder. Then, a "compiler" of sorts, written in Python, creates the static HTML page (showing completed and incomplete buses) which can be pushed/uploaded to a hosting platform with the new images so the page displays. This compiler scrapes official transit agency websites for up-to-date route data when run, though which URLs to use and the format of the data can be very hardcoded, finnicky, and inconsistent. The official King/Pierce County Trip Planner is also used (these seem to be using identical assets and code), as the Everett Transit and Pierce Transit official websites are lacking.
 
-The [images](images) folder contains real photographs of buses for each route, taken before, during, or after transportation. Capturing pedestrians in photos was avoided, but inevitable; as there is no reasonable expectation of privacy here, though, this is legal. If you want to try this challenge yourself, replacing the contents of the images folder with your own 500x500 .jpg images and then running `python3 html_compiler.py` from the project directory should produce a corresponding index.html file.
+The [images](images) folder contains real photographs of buses for each route, taken before, during, or after transportation. Capturing pedestrians in photos was avoided, but inevitable; as there is no reasonable expectation of privacy here, though, this is legal.
+
+If you want to try this challenge yourself, replacing the contents of the images folder with any number of your own 500x500 .jpg images whose filenames follow the same naming conventions and then running `python3 manybusesaway.py images` from the project directory should produce a corresponding index.html file. Any directory can be specified instead of `images`; however, this must be a relative path and this script must be executed from the website root directory for image links to work correctly. Additionally, `-o output.html` can be used to change the filename to output to, and the `-v` flag can be used for verbose output. Please leave a credit link to this repository at the bottom of the generated HTML output.
 
 ### History
 
@@ -45,3 +55,7 @@ Pierce Transit:
 Community Transit:
 - `701`, `702`, and `703` are Swift Blue, Green, and Orange, respectively. These are included by number rather than by name.
 - Some Sound Transit routes that serve Snohomish County are duplicated here, but these are skipped.
+
+### License
+
+This software is distributed under the terms of the GNU General Public License. Please see the [license](LICENSE.txt) for more details.

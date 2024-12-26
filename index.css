@@ -47,7 +47,7 @@ td:nth-child(1) {
     font-size: 22px;
 }
 td:nth-child(2), td:nth-child(3) {font-style: italic; width: 340px;}
-td:nth-child(1):hover, td:nth-child(2):hover, td:nth-child(3):hover {color: blue; cursor: pointer;}
+td:nth-child(1):hover, td:nth-child(2):hover, td:nth-child(3):hover, .credit:hover {color: blue; cursor: pointer;}
 td:nth-child(4) {text-align: center; width: 100px;}
 td:nth-child(5) {text-align: center; width: 160px;}
 td:nth-child(6) {padding: 0px; line-height: 0; height: 100px;}
