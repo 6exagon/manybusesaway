@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v3.2.b1
+ManyBusesAway v3.2.b2
 This program is used to generate an HTML file to display completed buses.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
 file modification dates for photographs (lost when uploading to webhosting or
@@ -202,7 +202,7 @@ This class extends RouteListing to include additional data from site listings.
 It inherits its constructor.
 '''
 class WebRouteListing(RouteListing):
-    def set_termini_from_path(self, path, delimiter):
+    def set_termini_path(self, path, delimiter):
         '''
         Sets self.start and self.dest given string path
         (list of destinations, separated by string delimiter).
@@ -226,14 +226,18 @@ class WebRouteListing(RouteListing):
         destinations = path.split(delimiter)
         self.start = destinations[0].lstrip().rstrip()
         self.dest = destinations[-1].lstrip().rstrip()
-    def set_termini_from_iter(self, i, regex):
+    def set_termini_iter(self, i, regex, delimiter=None):
         '''
         Sets self.start and self.dest given iterable of strings with those
         buried in redundant strings.
         re.Pattern regex is used to extract single terminus from string.
         This causes cryptic errors when imperfect regex is used to parse pages.
+        string delimiter is used to split path as above, if applicable.
         '''
         self.start, self.dest = (regex.fullmatch(s).group(1) for s in i)
+        if delimiter:
+            self.start = self.start.split(delimiter)[-1].lstrip()
+            self.dest = self.dest.split(delimiter)[-1].lstrip()
     def set_links(self, linkbase, linkpiece, linkoptions):
         '''
         Sets tuple self.links to string linkbase formatted with string linkpiece
@@ -368,7 +372,7 @@ def main():
         html_trolley = http_request(TROLLEY_URL, verbose=args.verbose)
         for m in re.finditer(re.compile(KCM_PATTERN), js_kcm):
             rl = WebRouteListing(m.group(2), 'K')
-            rl.set_termini_from_path(m.group(3), ',')
+            rl.set_termini_path(m.group(3), ',')
             rl.set_links(KCM_LINK_BASE, m.group(1), KCM_LINK_OPTIONS)
             rl.find_image(images, args.images)
             if 'Route ' + rl.number in html_trolley:
@@ -379,7 +383,7 @@ def main():
         html_st = http_request(ST_URL, verbose=args.verbose)
         for m in re.finditer(re.compile(ST_PATTERN), html_st):
             rl = WebRouteListing(m.group(2), 'S')
-            rl.set_termini_from_path(m.group(3), '-')
+            rl.set_termini_path(m.group(3), '-')
             rl.set_links(ST_LINK_BASE, m.group(1), ST_LINK_OPTIONS)
             rl.find_image(images, args.images)
             add_rl(route_listings, rl)
@@ -408,7 +412,7 @@ def main():
         html_et = http_request(ET_URL, verbose=args.verbose)
         for m in re.finditer(re.compile(ET_PATTERN), html_et):
             rl = WebRouteListing(m.group(2), 'E')
-            rl.set_termini_from_iter(tp_lines_dict.pop('E' + m.group(2)), tp_p)
+            rl.set_termini_iter(tp_lines_dict.pop('E' + m.group(2)), tp_p)
             # This error must be patched; again, Trip Planner data isn't great
             if rl.number == '6':
                 rl.start = 'Waterfront'
@@ -420,7 +424,7 @@ def main():
         html_pt = http_request(PT_URL, verbose=args.verbose)
         for m in re.finditer(re.compile(PT_PATTERN), html_pt):
             rl = WebRouteListing(m.group(2), 'P')
-            rl.set_termini_from_iter(tp_lines_dict.pop('P' + m.group(2)), tp_p)
+            rl.set_termini_iter(tp_lines_dict.pop('P' + m.group(2)), tp_p, '/')
             rl.links = tuple(m.group(1) for x in range(3))
             rl.find_image(images, args.images)
             add_rl(route_listings, rl)
@@ -430,7 +434,7 @@ def main():
         for m in re.finditer(re.compile(CT_PATTERN), html_ct):
             try:
                 rl = WebRouteListing(m.group(1), 'C')
-                rl.set_termini_from_path(m.group(2), '|')
+                rl.set_termini_path(m.group(2), '|')
                 rl.set_links(CT_LINK_BASE, m.group(1), CT_LINK_OPTIONS)
                 rl.find_image(images, args.images)
                 add_rl(route_listings, rl)
