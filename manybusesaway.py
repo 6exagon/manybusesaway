@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v3.2.b2
+ManyBusesAway v3.2.0
 This program is used to generate an HTML file to display completed buses.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
 file modification dates for photographs (lost when uploading to webhosting or
