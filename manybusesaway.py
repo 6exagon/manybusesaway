@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v3.2.0
+ManyBusesAway v3.2.1
 This program is used to generate an HTML file to display completed buses.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
 file modification dates for photographs (lost when uploading to webhosting or
@@ -351,49 +351,51 @@ def parse_args():
         help='relative path to image directory')
     return parser.parse_args()
     
-def main():
+def get_route_listings(img_path, agencies, verbose=False):
     '''
-    Entry point of program.
-    Parses arguments, gathers images that must be used while scraping buses
-    from all transit agencies, creates route table.
+    Gathers image files that must be used,
+    scrapes buses from all transit agencies, returns all RouteListings needed.
+    img_path is the path to check for images, and relative path to put in HTML.
+    agencies is the string of agency letters to include, in the order that
+    they should be listed in the HTML.
+    If verbose is True, extensive output will be printed to stdout.
     '''
-    args = parse_args()
     route_listings = []
     # Sadly, route_listings.append cannot be modified
-    if args.verbose:
+    if verbose:
         add_rl = lambda l, x: (print(x), l.append(x))
     else:
         add_rl = lambda l, x: l.append(x)
-    images = set(x for x in os.listdir(args.images) if x.endswith('jpg'))
+    images = set(x for x in os.listdir(img_path) if x.endswith('jpg'))
 
     html_trolley = ''                   # In case no request is sent
-    if 'K' in args.agencies:
-        js_kcm = http_request(KCM_URL, verbose=args.verbose)
-        html_trolley = http_request(TROLLEY_URL, verbose=args.verbose)
+    if 'K' in agencies:
+        js_kcm = http_request(KCM_URL, verbose=verbose)
+        html_trolley = http_request(TROLLEY_URL, verbose=verbose)
         for m in re.finditer(re.compile(KCM_PATTERN), js_kcm):
             rl = WebRouteListing(m.group(2), 'K')
             rl.set_termini_path(m.group(3), ',')
             rl.set_links(KCM_LINK_BASE, m.group(1), KCM_LINK_OPTIONS)
-            rl.find_image(images, args.images)
+            rl.find_image(images, img_path)
             if 'Route ' + rl.number in html_trolley:
                 rl.css_class = 'trolley'
             add_rl(route_listings, rl)
 
-    if 'S' in args.agencies:
-        html_st = http_request(ST_URL, verbose=args.verbose)
+    if 'S' in agencies:
+        html_st = http_request(ST_URL, verbose=verbose)
         for m in re.finditer(re.compile(ST_PATTERN), html_st):
             rl = WebRouteListing(m.group(2), 'S')
             rl.set_termini_path(m.group(3), '-')
             rl.set_links(ST_LINK_BASE, m.group(1), ST_LINK_OPTIONS)
-            rl.find_image(images, args.images)
+            rl.find_image(images, img_path)
             add_rl(route_listings, rl)
 
-    if 'E' in args.agencies or 'P' in args.agencies:
+    if 'E' in agencies or 'P' in agencies:
         # Only used for Pierce Transit and Everett Transit Routes
         json_tripplanner = http_request(
             TRIPPLANNER_URL,
             {'version': '1.1', 'method': 'GetLines'},
-            verbose=args.verbose)
+            verbose=verbose)
         tp_lines_list = json.loads(json_tripplanner)['result']['lines']
         # This stores map of string rlid to generator over destination listings
         tp_lines_dict = dict()
@@ -408,8 +410,8 @@ def main():
                 tp_lines_dict[rlid] = dirs
         tp_p = re.compile(TRIPPLANNER_PATTERN)
 
-    if 'E' in args.agencies:
-        html_et = http_request(ET_URL, verbose=args.verbose)
+    if 'E' in agencies:
+        html_et = http_request(ET_URL, verbose=verbose)
         for m in re.finditer(re.compile(ET_PATTERN), html_et):
             rl = WebRouteListing(m.group(2), 'E')
             rl.set_termini_iter(tp_lines_dict.pop('E' + m.group(2)), tp_p)
@@ -417,26 +419,26 @@ def main():
             if rl.number == '6':
                 rl.start = 'Waterfront'
             rl.set_links(ET_LINK_BASE, m.group(1), ET_LINK_OPTIONS)
-            rl.find_image(images, args.images)
+            rl.find_image(images, img_path)
             add_rl(route_listings, rl)
 
-    if 'P' in args.agencies:
-        html_pt = http_request(PT_URL, verbose=args.verbose)
+    if 'P' in agencies:
+        html_pt = http_request(PT_URL, verbose=verbose)
         for m in re.finditer(re.compile(PT_PATTERN), html_pt):
             rl = WebRouteListing(m.group(2), 'P')
             rl.set_termini_iter(tp_lines_dict.pop('P' + m.group(2)), tp_p, '/')
             rl.links = tuple(m.group(1) for x in range(3))
-            rl.find_image(images, args.images)
+            rl.find_image(images, img_path)
             add_rl(route_listings, rl)
 
-    if 'C' in args.agencies:
-        html_ct = http_request(CT_URL, verbose=args.verbose)
+    if 'C' in agencies:
+        html_ct = http_request(CT_URL, verbose=verbose)
         for m in re.finditer(re.compile(CT_PATTERN), html_ct):
             try:
                 rl = WebRouteListing(m.group(1), 'C')
                 rl.set_termini_path(m.group(2), '|')
                 rl.set_links(CT_LINK_BASE, m.group(1), CT_LINK_OPTIONS)
-                rl.find_image(images, args.images)
+                rl.find_image(images, img_path)
                 add_rl(route_listings, rl)
             except AttributeError:      # Raised on Sound Transit duplicate
                 continue
@@ -445,8 +447,8 @@ def main():
     while len(images):
         i = images.pop()
         rlid = i.rstrip('.jpg').lstrip('*')
-        if rlid[0] not in args.agencies:
-            if not (rlid[0] == 'X' and 'K' in args.agencies):
+        if rlid[0] not in agencies:
+            if not (rlid[0] == 'X' and 'K' in agencies):
                 continue                # Skip inapplicable images
         rl = RouteListing(rlid[1:], rlid[0])
         rl.nonexistence = i.startswith('*') + 1
@@ -455,7 +457,7 @@ def main():
         rl.img = i
         if rl.css_class in ('K8', 'K9') and not rl.number.startswith('DART'):
             rl.css_class = 'schools'    # Cannot check for "Serves" if absent
-        secs = os.stat(os.path.join(args.images, i)).st_birthtime
+        secs = os.stat(os.path.join(img_path, i)).st_birthtime
         rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
         if 'Route ' + rl.number in html_trolley and rl.agency == 'K':
             rl.css_class = 'trolley'    # This is worth a shot
@@ -463,7 +465,18 @@ def main():
 
     for rl in route_listings:
         # Precomputing this speeds up sorting
-        rl.position = rl.position(args.agencies)
+        rl.position = rl.position(agencies)
+    return route_listings
+
+def main():
+    '''
+    Entry point of program.
+    Parses arguments, gathers route listings, and writes them to output file.
+    '''
+    args = parse_args()
+    # get_route_listings needs most arguments to work
+    route_listings = get_route_listings(
+        args.images, args.agencies, args.verbose)
     if args.verbose:
         print('Sorting listings... ', end='', flush=True)
     route_listings.sort()
