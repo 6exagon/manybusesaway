@@ -318,7 +318,7 @@ def completenessHTML(route_listings):
         return '<h2>Fully Complete on %s</h2>' % dt
     if completed == total:
         return '''<h2>Fully Complete* on %s</h2>
-            <h3>*Excluding Unavailable Snow Shuttle</h3>''' % dt
+            <h3>*Excluding Atypical Snow Shuttle</h3>''' % dt
     return '<h2>%d%% Complete, Updated %s</h2>' % (completed * 100 // total, dt)
 
 

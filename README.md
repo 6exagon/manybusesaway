@@ -37,7 +37,7 @@ In summary, all King County Metro Transit and Sound Transit buses before Septemb
 Most buses are straightfowardly from one of the five transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus. Transportation methods not seemingly classified as buses and found in the same listings (Vanpool, Ferry, etc.) are not included.
 
 King County Metro Transit:
-- `90` is the King County Metro Transit snow shuttle, only operational during deep snow. It has not been operational since this challenge was started, but it may yet be.
+- `90` is the King County Metro Transit snow shuttle. It is very seldom operational (only during inclement weather), and the service advisories announcing it are inconsistent. It is certainly the most challenging bus to collect.
 - `96` is the First Hill Seattle Streetcar.
 - `97` is the Link Shuttle, as a replacement for when Sound Transit Link trains are not operational.
 - `98` is the South Lake Union Seattle Streetcar.
