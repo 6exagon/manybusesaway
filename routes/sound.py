@@ -1,5 +1,5 @@
 '''
-Constants and implementations of package interfaces for Community Transit.
+Constants and implementations of package interfaces for Sound Transit.
 See __init__.py for documentation.
 '''
 
@@ -30,11 +30,7 @@ class DataParser(DataParserInterface):
             if match.group(2) in self.routelistings:
                 rl = self.routelistings[match.group(2)]
             else:
-                try:
-                    rl = RouteListing(match.group(2))
-                except AttributeError:
-                    # Raised on SoundTransit duplicate
-                    continue
+                rl = RouteListing(match.group(2))
                 self.routelistings[match.group(2)] = rl
             rl.existence = 1
             rl.start = match.group(3)
@@ -42,21 +38,21 @@ class DataParser(DataParserInterface):
             rl.set_links(LINK_BASE, match.group(1), LINK_OPTIONS)
 
 class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename=None):
+    def __init__(self, short_filename):
         # This could be gotten from higher up, but this is a sanity check
         self.agency = 'sound'
         self.number = short_filename
         if short_filename.isnumeric():
-            self.css_class = self.agency + '-' + str(int(self.number) // 100)
+            self.css_class = str(int(self.number) // 100)
         else:
-            # Trains have -0 palette
-            self.css_class = self.agency + '-0'
+            # Trains have 0 palette
+            self.css_class = '0'
         super().__init__()
 
     def position(self):
         if self.number.isnumeric():
-            return int(self.number) + 256
-        return ord(self.number[0])
+            return int(self.number)
+        return ord(self.number[0]) - 256
 
     def displaynum(self):
         if len(self.number) != 1:

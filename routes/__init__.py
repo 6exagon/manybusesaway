@@ -15,7 +15,7 @@ TRIPPLANNER_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
     {'version': '1.1', 'method': 'GetLines'}))
 # This will allow all widely-supported raster image formats while disallowing
 # most other files incidentally present
-SHORT_FILENAME_PATTERN = re.compile(r'\*?(.*)\.[abefgijnpvw]+')
+SHORT_FILENAME_PATTERN = re.compile(r'\*?([\w\d]*)\.[abefgijnpvw]+')
 TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # This is for RouteListings to export their own HTML, in to_html()
 EXISTENCE_NOTES = (
@@ -149,7 +149,8 @@ class RouteListingInterface(ABC):
         self.links = (None, None, None)
         # Python doesn't have C-style enums, so 0 = discontinued, 1 = normal,
         # 2 = delisted
-        self.existence = 0
+        if not hasattr(self, 'existence'):
+            self.existence = 0
         self.datetime = 'Incomplete'
         self.img = None
 
@@ -207,10 +208,11 @@ class RouteListingInterface(ABC):
                 False)
         else:
             i_td = td('none', '')
+        full_css_class = self.agency + '-' + self.css_class
         return ROW_HTML % (
-            td('b-' + self.css_class, self.displaynum(), self.links[0]),
-            td('n-' + self.css_class, self.start, self.links[1]),
-            td('n-' + self.css_class, self.dest, self.links[2]),
+            td('b-' + full_css_class, self.displaynum(), self.links[0]),
+            td('n-' + full_css_class, self.start, self.links[1]),
+            td('n-' + full_css_class, self.dest, self.links[2]),
             td(*note),
             td('complete' if self.img else 'incomplete', self.datetime),
             i_td)

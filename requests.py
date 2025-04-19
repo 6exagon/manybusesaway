@@ -52,7 +52,7 @@ def request_one(url, verbose=False):
     if resp.status == 200:
         if verbose:
             print('HTTPS request for %s got response OK' % url)
-        returnval = resp.read().decode('utf-8')
+        returnval = resp.read().decode('utf-8').replace('\\', '')
     else:
         print(
             'HTTPS request for %s got response %d' % (url, resp.status),

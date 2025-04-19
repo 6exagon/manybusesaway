@@ -5,21 +5,18 @@ body {
     font-size: 16px;
     color: black;
 }
-
 h1 {
     font-size: 32px;
     font-style: italic;
     font-weight: normal;
     margin: 0px;
 }
-
 h2 {
     font-size: 18px;
     font-style: italic;
     font-weight: normal;
     margin-top: 5px;
 }
-
 h3 {
     font-size: 10px;
     font-style: italic;
@@ -27,7 +24,6 @@ h3 {
     top: -9px;
     position: relative;
 }
-
 table {
     border-collapse: collapse;
     table-layout: fixed;
@@ -39,7 +35,6 @@ td {
     vertical-align: middle;
     padding: 5px;
 }
-
 td:nth-child(1) {
     text-align: right;
     font-weight: bold;
@@ -66,7 +61,6 @@ img:hover {
 .n-king-special {background-color: #bfb44d;}
 .b-king-nonbus {background-color: #76bdf0; color: white}
 .n-king-nonbus {background-color: #a5d0e9;}
-
 .b-king-0 {background-color: #0a664f; color: white}
 .n-king-0 {background-color: #62b39d;}
 .b-king-1 {background-color: #1c7b8c;}
@@ -81,8 +75,8 @@ img:hover {
 .n-sound-0 {background-color: #e0e0e6;}
 .b-sound-5 {background-color: #f0f0ff;}
 .n-sound-5 {background-color: #c7d8f5;}
-.b-everett-0 {background-color: #ef0000;}
-.n-everett-0 {background-color: #97a2a9;}
+.b-everett {background-color: #ef0000;}
+.n-everett {background-color: #97a2a9;}
 .b-community-1 {background-color: #0081e0;}
 .n-community-1 {background-color: #b9dffa;}
 .b-community-2 {background-color: #0056c3; color: white}

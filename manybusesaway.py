@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.0.a1
+ManyBusesAway v4.0.a2
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -39,7 +39,7 @@ FINAL_HTML = '''
 
 NOTES = '''
 Only current King County Metro, Sound Transit, Everett Transit, Community
- Transit, Pierce Transit, and InterCity Transit routes are included.<br>
+ Transit, Pierce Transit, and Intercity Transit routes are included.<br>
 King County Metro and Sound Transit routes from immediately before the
  September 2024 service change are also included.<br>
 Routes with <span class="discontinued">Discontinued</span> tag have been

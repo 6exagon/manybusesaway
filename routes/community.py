@@ -41,7 +41,7 @@ class DataParser(DataParserInterface):
             rl.set_links(LINK_BASE, match.group(1), LINK_OPTIONS)
 
 class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename=None):
+    def __init__(self, short_filename):
         # This could be gotten from higher up, but this is a sanity check
         self.agency = 'community'
         if not short_filename.isnumeric():
@@ -53,10 +53,10 @@ class RouteListing(RouteListingInterface):
             raise AttributeError
         elif series == 4:
             series = 9
-        self.css_class = self.agency + '-' + str(series)
+        self.css_class = str(series)
         super().__init__()
 
     def displaynum(self):
-        if self.css_class[-1] == '7':
+        if self.css_class == '7':
             return '<p class="community-swift">Swift</p>' + self.number
         return self.number
