@@ -15,7 +15,7 @@ from datetime import datetime
 # This is because they're less accurate and well-maintained as a source
 TP_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
     {'version': '1.1', 'method': 'GetLines'}))
-TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (.*?)(?: via .*)?')
+TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (?:.*?\/ )*?([^\/]*?)(?: via .*)?')
 # This will allow all widely-supported raster image formats while disallowing
 # most other files incidentally present
 SHORT_FILENAME_PATTERN = re.compile(r'\*?([\w\d]*)\.[abefgijnpvw]+')

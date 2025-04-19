@@ -8,10 +8,10 @@ import re
 from . import DataParserInterface, RouteListingInterface
 
 # This Sound Transit page's formatting is absolutely horrible and inconsistent,
-# but it's seemingly the best resource there is
+# as seen by the regex, but it's seemingly the best resource there is
 MAIN_URL = 'www.soundtransit.org/ride-with-us/schedules-maps'
 ROUTE_PATTERN = re.compile(r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?'\
-    + r'(\d+|\w)(?: Line)?.\(([\w \/\.]+) \W (?:[^)]* ?\W )?([\w \/\.]+)\)')
+    + r'(\d+|\w)(?: Line)?.\(([\w \/\.]+) \W (?:[^)]* ?\W )?([\w \/\.]+?) ?\)')
 LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
 LINK_OPTIONS = ('', '?direction=1', '?direction=0')
 
