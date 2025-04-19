@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.0.a0
+ManyBusesAway v4.0.a1
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -22,19 +22,19 @@ DEFAULT_AGENCIES_ORDER = (
 FINAL_HTML = '''
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <link href="index.css" rel="stylesheet" type="text/css"/>
-        <link rel="icon" href="icon.ico">
-        <title>ManyBusesAway</title>
-    </head>
-    <body>
-        <h1>Completed Buses</h1>
-        %s
-        %s
-        <p>%s</p>
-        <span class="credit" onclick="window.open(\'%s\', \'_blank\')">%s</span>
-    </body>
+  <head>
+    <meta charset="UTF-8">
+    <link href="index.css" rel="stylesheet" type="text/css"/>
+    <link rel="icon" href="icon.ico">
+    <title>ManyBusesAway</title>
+  </head>
+  <body>
+    <h1>Completed Buses</h1>
+    %s
+%s
+    <p>%s</p>
+    <span class="credit" onclick="window.open(\'%s\', \'_blank\')">%s</span>
+  </body>
 </html>'''
 
 NOTES = '''

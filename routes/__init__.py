@@ -20,7 +20,8 @@ TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # This is for RouteListings to export their own HTML, in to_html()
 EXISTENCE_NOTES = (
     ('discontinued', 'Discontinued'), ('none', ''), ('delisted', 'Delisted'))
-ROW_HTML = '%s<tr>%s</tr>' % (' ' * 12, '%s' * 6)
+TABLE_HTML = '    <table>\n%s\n    </table>'
+ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
 
 class DataParserInterface(ABC):
@@ -124,7 +125,7 @@ class DataParserInterface(ABC):
             print('Done')
             for l in listings:
                 print(l)
-        return '<table>%s</table>' % '\n'.join(l.to_html() for l in listings)
+        return TABLE_HTML % '\n'.join(l.to_html() for l in listings)
 
 class RouteListingInterface(ABC):
     '''
