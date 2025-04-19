@@ -40,6 +40,7 @@ td:nth-child(1) {
     font-weight: bold;
     font-family: "Trebuchet MS", sans-serif;
     font-size: 22px;
+    width: 40px;
 }
 td:nth-child(2), td:nth-child(3) {font-style: italic; width: 340px;}
 td:nth-child(1):hover, td:nth-child(2):hover, td:nth-child(3):hover, .credit:hover {color: blue; cursor: pointer;}
@@ -75,8 +76,8 @@ img:hover {
 .n-sound-0 {background-color: #e0e0e6;}
 .b-sound-5 {background-color: #f0f0ff;}
 .n-sound-5 {background-color: #c7d8f5;}
-.b-everett {background-color: #ef0000;}
-.n-everett {background-color: #97a2a9;}
+.b-everett- {background-color: #ef0000;}
+.n-everett- {background-color: #97a2a9;}
 .b-community-1 {background-color: #0081e0;}
 .n-community-1 {background-color: #b9dffa;}
 .b-community-2 {background-color: #0056c3; color: white}
@@ -85,8 +86,8 @@ img:hover {
 .n-community-7 {background-color: #a1e6a5;}
 .b-community-9 {background-color: #0030c0; color: white}
 .n-community-9 {background-color: #ffffff;}
-.b-pierce {background-color: #4dbb34; color: white}
-.n-pierce {background-color: #f4fff4;}
+.b-pierce- {background-color: #4dbb34; color: white}
+.n-pierce- {background-color: #f4fff4;}
 
 .king-dart {
     color: #ef2400;

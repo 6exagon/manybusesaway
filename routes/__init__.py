@@ -10,9 +10,12 @@ import os
 import re
 from datetime import datetime
 
-# This constant is imported by other files
-TRIPPLANNER_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
+# These two constants are imported for Pierce Transit and Everett Transit routes
+# Though they could be, they're not used for other agencies
+# This is because they're less accurate and well-maintained as a source
+TP_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
     {'version': '1.1', 'method': 'GetLines'}))
+TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (.*?)(?: via .*)?')
 # This will allow all widely-supported raster image formats while disallowing
 # most other files incidentally present
 SHORT_FILENAME_PATTERN = re.compile(r'\*?([\w\d]*)\.[abefgijnpvw]+')
@@ -217,13 +220,13 @@ class RouteListingInterface(ABC):
             td('complete' if self.img else 'incomplete', self.datetime),
             i_td)
 
-    @abstractmethod
     def displaynum(self):
         '''
         Returns this RouteListing's HTML number, which could be the simple
         number in plaintext or contain more complicated HTML.
+        This will almost always be overridden.
         '''
-        pass
+        return self.number
 
 def td(css_class, data, link=None, blank=True):
     '''
