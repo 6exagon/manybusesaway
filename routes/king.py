@@ -10,8 +10,9 @@ from . import DataParserInterface, RouteListingInterface
 MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
     + 'fe-apps/schedule/09142024/js/find-a-schedule-js.js'
 TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
-ROUTE_PATTERN = r'<option value="([^"]+)">(DART +)?([A-Z\d]+?)'\
-    + r'(?: Line| Shuttle)? - (.*?)<\/option>'
+ROUTE_PATTERN = re.compile(r'<option value="([^"]+)">(DART +)?([A-Z\d]+?)'\
+    + r'(?: Line| Shuttle)? - (.*?)<\/option>')
+SERVICE_PATTERN = re.compile(r'Service between (.*) and (?:the | )(.*)')
 LINK_BASE = 'https://kingcounty.gov%s#%s'
 # King is the only reliable agency for route directions corresponding to
 # listing order, unfortunately
@@ -32,7 +33,7 @@ class DataParser(DataParserInterface):
         if not trolley_html:
             # Not a disaster, we can just render without visible trolley colors
             trolley_html = ''
-        for match in re.finditer(ROUTE_PATTERN, main_js):
+        for match in ROUTE_PATTERN.finditer(main_js):
             if match.group(2):
                 number = match.group(2).rstrip() + match.group(3)
             else:
@@ -84,7 +85,7 @@ class RouteListing(RouteListingInterface):
         King County Metro routes require a more complex method to obtain
         route termini than a regex group.
         '''
-        match = re.match('Service between (.*) and (?:the | )(.*)', string)
+        match = SERVICE_PATTERN.match(string)
         if match:
             self.start, self.dest = match.group(1), match.group(2)
             return

@@ -26,7 +26,7 @@ class DataParser(DataParserInterface):
         html = resources[MAIN_URL]
         if not html:
             return
-        for match in re.finditer(ROUTE_PATTERN, html):
+        for match in ROUTE_PATTERN.finditer(html):
             if match.group(2) in self.routelistings:
                 rl = self.routelistings[match.group(2)]
             else:
@@ -57,5 +57,5 @@ class RouteListing(RouteListingInterface):
     def displaynum(self):
         if len(self.number) != 1:
             return self.number
-        return '<span class="circle sound-c%s">%s</span>' % (
+        return '<span class="circle" id="sound-c%s">%s</span>' % (
             self.number, self.number)

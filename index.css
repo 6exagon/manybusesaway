@@ -88,6 +88,8 @@ img:hover {
 .n-community-9 {background-color: #ffffff;}
 .b-pierce- {background-color: #4dbb34; color: white}
 .n-pierce- {background-color: #f4fff4;}
+.b-intercity- {background-color: #254391; color: white}
+.n-intercity- {background-color: #c7e3fb;}
 
 .king-dart {
     color: #ef2400;
@@ -98,10 +100,10 @@ img:hover {
     margin: -2px;
     letter-spacing: 0.06rem;
 }
-.sound-cN, .sound-cS {background-color: #9ab6d3;}
-.sound-cT {background-color: #f38b00;}
-.sound-c1 {background-color: #3dae2b; color: white}
-.sound-c2 {background-color: #00a0df; color: white}
+#sound-cN, #sound-cS {background-color: #9ab6d3;}
+#sound-cT {background-color: #f38b00;}
+#sound-c1 {background-color: #3dae2b; color: white}
+#sound-c2 {background-color: #00a0df; color: white}
 .community-swift {
     color: #0060d0;
     font-style: italic;
@@ -111,6 +113,14 @@ img:hover {
     margin: -5px;
     margin-right: 4px;
 }
+#intercity-one {
+    text-align: center;
+    font-size: 30px;
+    font-family: Courier New, sans-serif;
+    margin-bottom: -12px;
+    margin-top: 10px;
+}
+.intercity-green {color: #80e54a;}
 
 .circle {
     display: block;

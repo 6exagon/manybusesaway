@@ -25,7 +25,7 @@ class DataParser(DataParserInterface):
         html = resources[MAIN_URL]
         if not html:
             return
-        for match in re.finditer(ROUTE_PATTERN, html):
+        for match in ROUTE_PATTERN.finditer(html):
             if match.group(1) in self.routelistings:
                 rl = self.routelistings[match.group(1)]
             else:

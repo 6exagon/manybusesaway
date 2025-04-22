@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.0.a4
+ManyBusesAway v4.0.a5
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -105,11 +105,13 @@ def main():
     if args.images:
         # Each DataParser is constructed with its image directory
         # This will automatically create RouteListings for each image it has
-        data_parsers = tuple(route_modules[i].DataParser(a, args.images)
+        data_parsers = tuple(
+            route_modules[i].DataParser(a, args.verbose, args.images)
             for i, a in enumerate(args.agencies))
     else:
         # Construct DataParsers with no image directory
-        data_parsers = tuple(route_modules[i].DataParser(a)
+        data_parsers = tuple(
+            route_modules[i].DataParser(a, args.verbose)
             for i, a in enumerate(args.agencies))
 
     # For each module, get requests it wants performed; see
@@ -129,7 +131,7 @@ def main():
     with open(args.output, 'w') as fp:
         fp.write(FINAL_HTML % (
             completenessHTML(data_parsers),
-            '\n'.join([d.to_html(args.verbose) for d in data_parsers]),
+            '\n'.join([d.to_html() for d in data_parsers]),
             NOTES,
             'https://github.com/6exagon/manybusesaway',
             re.search(r'([^\s]*\sv\d\.\d\..*)\s', __doc__).group(1)))

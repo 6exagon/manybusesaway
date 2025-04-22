@@ -34,7 +34,7 @@ class DataParser(DataParserInterface):
                 rlid = i['lineAbbr'][2:]
                 tp_lines_dict[rlid] = (x['signage'] for x in i['directions'])
 
-        for match in re.finditer(ROUTE_PATTERN, html):
+        for match in ROUTE_PATTERN.finditer(html):
             if match.group(2) in self.routelistings:
                 rl = self.routelistings[match.group(2)]
             else:
