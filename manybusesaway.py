@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.0.a5
+ManyBusesAway v4.0.a6
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -13,11 +13,12 @@ from importlib import import_module
 import re
 from datetime import datetime
 from time import time
+import locale
 
 from requests import request_all
 
 DEFAULT_AGENCIES_ORDER = (
-    'king', 'sound', 'everett', 'community', 'pierce', 'intercity')
+    'king', 'sound', 'everett', 'community', 'pierce', 'intercity', 'kitsap')
 
 FINAL_HTML = '''
 <!DOCTYPE html>
@@ -38,10 +39,10 @@ FINAL_HTML = '''
 </html>'''
 
 NOTES = '''
-Only current King County Metro, Sound Transit, Everett Transit, Community
- Transit, Pierce Transit, and Intercity Transit routes are included.<br>
-King County Metro and Sound Transit routes from immediately before the
- September 2024 service change are also included.<br>
+All King County Metro and Sound Transit routes since September 2023 are
+ included.<br>
+Current Everett Transit, Community Transit, Pierce Transit, Intercity Transit,
+ and Kitsap Transit routes are also included.<br>
 Routes with <span class="discontinued">Discontinued</span> tag have been
  discontinued since their completion.<br>
 Routes with <span class="delisted">Delisted</span> tag remain operational
@@ -99,6 +100,8 @@ def main():
     Entry point of program.
     Parses arguments, gathers route listings, and writes them to output file.
     '''
+    # This is necessary for time formatting
+    locale.setlocale(locale.LC_TIME, 'en_US')
     args = parse_args()
     # For each agency requested, import its module and create its DataParser
     route_modules = tuple(import_module('routes.' + m) for m in args.agencies)
