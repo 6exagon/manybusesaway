@@ -7,7 +7,7 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
-# This Sound Transit page's formatting is absolutely horrible and inconsistent,
+# This Sound Transit page's formatting is terrible and inconsistent,
 # as seen by the regex, but it's seemingly the best resource there is
 MAIN_URL = 'www.soundtransit.org/ride-with-us/schedules-maps'
 ROUTE_PATTERN = re.compile(r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?'\

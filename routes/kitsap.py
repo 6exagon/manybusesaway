@@ -134,6 +134,7 @@ HEADERS = {
 U_0 = '/bustime'
 U_1 = '/api/v3/gettime?requestType=gettime&unixTime=true&key=%s&format=json&xtime=%d'
 U_2 = '/api/v3/getroutes?requestType=getroutes&locale=en&key=%s&format=json&xtime=%d'
+V_MSG = 'HTTPS requests for kttracker.com got response %s'
 
 def kitsap_request(verbose=False):
     '''
@@ -148,17 +149,12 @@ def kitsap_request(verbose=False):
         U_0 + U_1 % (K_E.translate(u), round(time() * 1000)),
         headers=HEADERS)
     resp = connection.getresponse()
-    if resp.status == 200:
-        if verbose:
-            print('HTTPS request for kttracker.com got response OK')
-        jsonr = resp.read().decode('utf-8')
-        ht = int(loads(jsonr)["bustime-response"]["tm"]) + 20
-    else:
-        print(
-            'HTTPS request for kttracker.com got response %d' % resp.status,
-            file=stderr)
+    if resp.status != 200:
+        print(V_MSG % resp.status, file=stderr)
         connection.close()
         return None
+    jsonr = resp.read().decode('utf-8')
+    ht = int(loads(jsonr)["bustime-response"]["tm"]) + 20
     dt = datetime.fromtimestamp(ht // 1000).astimezone(timezone.utc).strftime(
         '%a, %d %b %Y %H:%M:%S GMT')
     key = U_2 % (K_E.translate(u), ht) + dt
@@ -170,12 +166,10 @@ def kitsap_request(verbose=False):
     resp = connection.getresponse()
     if resp.status == 200:
         if verbose:
-            print('HTTPS request for kttracker.com got response OK')
+            print(V_MSG % 'OK')
         returnval = resp.read().decode('utf-8')
     else:
-        print(
-            'HTTPS request for kttracker.com got response %d' % resp.status,
-            file=stderr)
+        print(V_MSG % resp.status, file=stderr)
         returnval = None
     connection.close()
     return returnval

@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.0.a6
+ManyBusesAway v4.0.a7
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -18,7 +18,8 @@ import locale
 from requests import request_all
 
 DEFAULT_AGENCIES_ORDER = (
-    'king', 'sound', 'everett', 'community', 'pierce', 'intercity', 'kitsap')
+    'king', 'sound', 'everett', 'community', 'pierce', 'intercity',
+    'kitsap', 'skagit')
 
 FINAL_HTML = '''
 <!DOCTYPE html>
@@ -42,7 +43,7 @@ NOTES = '''
 All King County Metro and Sound Transit routes since September 2023 are
  included.<br>
 Current Everett Transit, Community Transit, Pierce Transit, Intercity Transit,
- and Kitsap Transit routes are also included.<br>
+ Kitsap Transit, and Skagit Transit routes are also included.<br>
 Routes with <span class="discontinued">Discontinued</span> tag have been
  discontinued since their completion.<br>
 Routes with <span class="delisted">Delisted</span> tag remain operational
