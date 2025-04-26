@@ -70,7 +70,7 @@ def send(conn, page, body=None, verbose=False):
     if resp.status == 200:
         if verbose:
             print(V_MSG % (conn.host, page, 'OK'))
-        return resp.read().decode('utf-8').replace('\\', '')
+        return resp.read().decode('utf-8')
     elif resp.status // 100 == 3:
         # All types of redirects should do this
         if verbose:

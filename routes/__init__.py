@@ -102,6 +102,14 @@ class DataParserInterface(ABC):
         '''
         pass
 
+    def sanitize_strings(self):
+        '''
+        Independently of agency-specific code, makes known string fixes to
+        RouteListings.
+        '''
+        for rl in self.routelistings.values():
+            rl.sanitize_strings()
+
     def completed(self):
         '''
         Returns two integers: the number of total existing routes in
@@ -195,17 +203,26 @@ class RouteListingInterface(ABC):
         '''
         self.links = tuple(linkbase % (linkpiece, o) for o in linkoptions)
 
+    def sanitize_strings(self):
+        '''Sanitizes self.start and self.dest to fix known inconsistencies.'''
+        # The rstrip is just in case, but it should be covered previously
+        self.start = self.start.replace('\\', '').replace('amp;', '').rstrip()
+        self.dest = self.dest.replace('\\', '').replace('amp;', '').rstrip()
+
     def to_html(self):
         '''
         Returns this row's <tr> HTML element for the final table.
         This isn't the most elegant way to handle CSS classes when writing HTML
         by hand, but it is more simple when generating it.
         Handles special cases for visuals.
+        Sanitizes self.start and self.dest "P&R" cases to output correct
+        HTML ampersands in HTML.
         '''
         # More notes may be needed in the future
         note = EXISTENCE_NOTES[self.existence]
         if self.img:
-            i_link = self.img
+            # This needs to output correct "/" HTML on Windows as well
+            i_link = self.img.replace(os.path.sep, '/')
             i_td = td(
                 'none',
                 IMG_HTML % (i_link, self.number, self.number),
@@ -214,10 +231,13 @@ class RouteListingInterface(ABC):
         else:
             i_td = td('none', '')
         full_css_class = self.agency + '-' + self.css_class
+        # This is better than many of the transit agencies are doing
+        displaystart = self.start.replace('&', '&amp;')
+        displaydest = self.dest.replace('&', '&amp;')
         return ROW_HTML % (
             td('b-' + full_css_class, self.displaynum(), self.links[0]),
-            td('n-' + full_css_class, self.start, self.links[1]),
-            td('n-' + full_css_class, self.dest, self.links[2]),
+            td('n-' + full_css_class, displaystart, self.links[1]),
+            td('n-' + full_css_class, displaydest, self.links[2]),
             td(*note),
             td('complete' if self.img else 'incomplete', self.datetime),
             i_td)

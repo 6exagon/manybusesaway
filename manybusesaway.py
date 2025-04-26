@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.0.a7
+ManyBusesAway v4.0.b0
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -129,6 +129,7 @@ def main():
         zip(initial_requests, request_all(initial_requests, args.verbose)))
     for d in data_parsers:
         d.update(initial_resources)
+        d.sanitize_strings()
 
     if args.verbose:
         print('Writing to %s...' % args.output)
