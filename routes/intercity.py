@@ -37,7 +37,7 @@ class DataParser(DataParserInterface):
                 self.routelistings[match.group(1)] = rl
             rl.existence = 1
             link = MAIN_URL + '/' + match.group(1)
-            rl.links = tuple(link for x in range(3))
+            rl.links = tuple('https://' + link for x in range(3))
             # This may or may not be used
             rl.desc = match.group(2)
             timetable_requests.append(link)

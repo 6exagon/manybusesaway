@@ -21,8 +21,9 @@ TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (?:.*?\/ )*?([^\/]*?)(?: via .*)?')
 SHORT_FILENAME_PATTERN = re.compile(r'\*?([\w\d]*)\.[abefgijnpvw]+')
 TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # This is for RouteListings to export their own HTML, in to_html()
+# More notes may be needed in the future
 EXISTENCE_NOTES = (
-    ('discontinued', 'Discontinued'), ('none', ''), ('delisted', 'Delisted'))
+    ('Discontinued', 'discontinued'), ('',), ('Delisted', 'delisted'))
 TABLE_HTML = '    <table>\n%s\n    </table>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
@@ -212,34 +213,36 @@ class RouteListingInterface(ABC):
     def to_html(self):
         '''
         Returns this row's <tr> HTML element for the final table.
-        This isn't the most elegant way to handle CSS classes when writing HTML
-        by hand, but it is more simple when generating it.
         Handles special cases for visuals.
         Sanitizes self.start and self.dest "P&R" cases to output correct
         HTML ampersands in HTML.
         '''
-        # More notes may be needed in the future
-        note = EXISTENCE_NOTES[self.existence]
         if self.img:
             # This needs to output correct "/" HTML on Windows as well
             i_link = self.img.replace(os.path.sep, '/')
             i_td = td(
-                'none',
                 IMG_HTML % (i_link, self.number, self.number),
-                i_link,
-                False)
+                link=i_link,
+                blank=False)
         else:
-            i_td = td('none', '')
-        full_css_class = self.agency + '-' + self.css_class
-        # This is better than many of the transit agencies are doing
+            i_td = td('')
+        full_class = self.agency + '-' + self.css_class
         displaystart = self.start.replace('&', '&amp;')
-        displaydest = self.dest.replace('&', '&amp;')
+        if len(self.dest):
+            displaydest = self.dest.replace('&', '&amp;')
+            start_td = td(displaystart, 'n-' + full_class, link=self.links[1])
+            dest_td = td(displaydest, 'n-' + full_class, link=self.links[2])
+        else:
+            start_td = td(
+                displaystart, 'n-' + full_class, link=self.links[1], span=True)
+            # There is no destination, so this is what will be substituted in
+            dest_td = ''
         return ROW_HTML % (
-            td('b-' + full_css_class, self.displaynum(), self.links[0]),
-            td('n-' + full_css_class, displaystart, self.links[1]),
-            td('n-' + full_css_class, displaydest, self.links[2]),
-            td(*note),
-            td('complete' if self.img else 'incomplete', self.datetime),
+            td(self.displaynum(), 'b-' + full_class, link=self.links[0]),
+            start_td,
+            dest_td,
+            td(*EXISTENCE_NOTES[self.existence]),
+            td(self.datetime, 'complete' if self.img else 'incomplete'),
             i_td)
 
     def displaynum(self):
@@ -250,16 +253,22 @@ class RouteListingInterface(ABC):
         '''
         return self.number
 
-def td(css_class, data, link=None, blank=True):
+def td(data, css_class=None, **kwargs):
     '''
-    Returns <td> HTML element given css_class, text/image data, and link.
-    If link should open in same tab, blank should be False.
+    Returns <td> HTML element given text/image data and specific parameters
+    related to its HTML attributes.
+    If td should have a CSS class, string css_class should be set to that.
+    If td should link to something, string link should be set to the location
+    (and if link should open in same tab, bool blank should be False).
+    If td should span an extra column, bool span should be True.
     '''
-    if not link:
-        return '<td class="%s">%s</td>' % (css_class, data)
-    if blank:
-        jsfunc = 'window.open(\'%s\', \'_blank\')' % link
-    else:
-        jsfunc = 'window.open(\'%s\', \'_self\')' % link
-    return '<td class="%s" onclick="%s">%s</td>'\
-        % (css_class, jsfunc, data)
+    td_elem = ['td']
+    if css_class:
+        td_elem.append('class="%s"' % css_class)
+    if kwargs.get('link', None):
+        behavior = '_blank' if kwargs.get('blank', True) else '_self'
+        td_elem.append(
+            'onclick="window.open(\'%s\', \'%s\')"' % (kwargs['link'], behavior))
+    if kwargs.get('span', False):
+        td_elem.append('colspan="2"')
+    return '<%s>%s</td>' % (' '.join(td_elem), data)
