@@ -8,6 +8,7 @@ import re
 from . import DataParserInterface, RouteListingInterface
 from requests import request_all
 
+AGENCY = 'Intercity Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'www.intercitytransit.com/plan-your-trip/routes'
 ROUTE_PATTERN = re.compile(r'value="([\w\d]+)">\1.*\W ([\w\d\s\/]*)<')
@@ -17,6 +18,9 @@ TERMS_PATTERN = re.compile(r'Outbound Stops[\s\w\d\/<>]*?<tbody>\s*'\
     + r'<tr class=\"timepoint\">\s*<th>\s*(.*?)(?: \[\wb\])?\n[\w\W]*</table>')
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

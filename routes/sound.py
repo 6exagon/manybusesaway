@@ -7,6 +7,7 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
+AGENCY = 'Sound Transit'
 # This Sound Transit page's formatting is terrible and inconsistent,
 # as seen by the regex, but it's seemingly the best resource there is
 MAIN_URL = 'www.soundtransit.org/ride-with-us/schedules-maps'
@@ -16,6 +17,9 @@ LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
 LINK_OPTIONS = ('', '?direction=1', '?direction=0')
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

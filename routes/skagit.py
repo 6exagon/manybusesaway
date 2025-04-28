@@ -8,6 +8,7 @@ import re
 from . import DataParserInterface, RouteListingInterface
 from requests import request_all
 
+AGENCY = 'Skagit Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'www.skagittransit.org/routes/'
 # Skagit Transit's formatting all over their website is absolutely horrible and
@@ -24,6 +25,9 @@ TERMS_PATTERN = re.compile(r'<h1>Route (\d+X?).*?</h1>\s*<h2>(?:Route \d+X? )?'\
     + r'([\w&\s]+?)(?:\s?\/[\/\w&\s]*?\s?([\w&\s]+?))?(?:<|\svia)')
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

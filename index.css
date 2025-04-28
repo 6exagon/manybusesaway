@@ -1,28 +1,27 @@
 body {
-    margin: 15px;
     background-color: #f3f3f3;
     font-family: Verdana, sans-serif;
     font-size: 16px;
     color: black;
+    margin: 15px;
 }
 h1 {
-    font-size: 32px;
+    font-size: 33px;
     font-style: italic;
     font-weight: normal;
     margin: 0px;
 }
 h2 {
-    font-size: 18px;
+    font-size: 19px;
     font-style: italic;
     font-weight: normal;
-    margin-top: 5px;
+    margin: 0px;
+    margin-top: 4px;
 }
 h3 {
-    font-size: 10px;
-    font-style: italic;
-    font-weight: normal;
-    top: -9px;
-    position: relative;
+    font-size: 16.5px;
+    margin-top: 10px;
+    margin-bottom: 8px;
 }
 table {
     border-collapse: collapse;
@@ -55,7 +54,7 @@ img:hover {
 
 .b-king-trolley {background-color: #4f1568; color: white}
 .n-king-trolley {background-color: #ad76c4;}
-.b-king-rapidride {background-color: #b60000; color: white}
+.b-king-rapidride {background-color: #b60000;}
 .n-king-rapidride {background-color: #ef5a5d;}
 .b-king-schools {background-color: #4abeba;}
 .n-king-schools {background-color: #bfcfcf;}
@@ -91,6 +90,22 @@ img:hover {
 .n-pierce- {background-color: #f4fff4;}
 .b-intercity- {background-color: #254391; color: white}
 .n-intercity- {background-color: #c7e3fb;}
+.b-kitsap-0 {background-color: #f4a03f;}
+.n-kitsap-0 {background-color: #fff4e8;}
+.b-kitsap-2 {background-color: #5b92a3; color: white}
+.n-kitsap-2 {background-color: #a0dfeb;}
+.b-kitsap-3 {background-color: #2c717c;}
+.n-kitsap-3 {background-color: #60a1a6;}
+.b-kitsap-4 {background-color: #ea7037; color: white}
+.n-kitsap-4 {background-color: #f2aa79;}
+.b-kitsap-6 {background-color: #ffffff;}
+.n-kitsap-6 {background-color: #f0fdff;}
+.b-kitsap-8 {background-color: #256fa4; color: white}
+.n-kitsap-8 {background-color: #badfe6;}
+.b-skagit-X {background-color: #41914a; color: white}
+.n-skagit-X {background-color: #9ed9a3;}
+.b-skagit- {background-color: #194122; color: white}
+.n-skagit- {background-color: #fbfffb;}
 
 .king-dart {
     color: #ef2400;

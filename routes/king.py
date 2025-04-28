@@ -7,6 +7,7 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
+AGENCY = 'King County Metro'
 MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
     + 'fe-apps/schedule/09142024/js/find-a-schedule-js.js'
 TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
@@ -19,6 +20,9 @@ LINK_BASE = 'https://kingcounty.gov%s#%s'
 LINK_OPTIONS = ('route-map', 'weekday', 'weekday-b')
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

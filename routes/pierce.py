@@ -8,6 +8,7 @@ import re
 
 from . import DataParserInterface, RouteListingInterface, TP_REQ, TP_PATTERN
 
+AGENCY = 'Pierce Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'piercetransit.org/pierce-transit-routes/'
 ROUTE_PATTERN = re.compile(
@@ -15,6 +16,9 @@ ROUTE_PATTERN = re.compile(
 # Pierce Transit allows no options; navigation is all done through JavaScript
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

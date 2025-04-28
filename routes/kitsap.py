@@ -15,6 +15,7 @@ from sys import stderr
 
 from . import DataParserInterface, RouteListingInterface
 
+AGENCY = 'Kitsap Transit'
 # This isn't even everything we need
 # This first resource is very out of date, but we won't rely on it much
 MAIN_URL = 'kttracker.com/assets/ta/kitsaptransit/config.json'
@@ -26,6 +27,9 @@ LINK_BASE = 'https://www.kitsaptransit.com/service'
 # themselves in an inconsistent format
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

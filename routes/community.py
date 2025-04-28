@@ -7,6 +7,7 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
+AGENCY = 'Community Transit'
 MAIN_URL = 'www.communitytransit.org/maps-and-schedules/'\
     + 'maps-and-schedules-by-route'
 ROUTE_PATTERN = re.compile(
@@ -15,6 +16,9 @@ LINK_BASE = 'https://www.communitytransit.org/route/%s%s'
 LINK_OPTIONS = ('', '/table', '/0/table')
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

@@ -8,6 +8,7 @@ import re
 
 from . import DataParserInterface, RouteListingInterface, TP_REQ, TP_PATTERN
 
+AGENCY = 'Everett Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'everetttransit.org/101/Schedules'
 ROUTE_PATTERN = re.compile(r'<a href="([^"]+)".*>Route (\d+)<\/span><\/a>')
@@ -15,6 +16,9 @@ LINK_BASE = '%s#page=%s'
 LINK_OPTIONS = ('1', '2', '2')
 
 class DataParser(DataParserInterface):
+    def get_agency_fullname(self):
+        return AGENCY
+
     def get_route_listing_class(self):
         return RouteListing
 

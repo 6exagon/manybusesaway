@@ -24,7 +24,7 @@ TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # More notes may be needed in the future
 EXISTENCE_NOTES = (
     ('Discontinued', 'discontinued'), ('',), ('Delisted', 'delisted'))
-TABLE_HTML = '    <table>\n%s\n    </table>'
+TABLE_HTML = '    <h3>%s</h3>\n    <table>\n%s\n    </table>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
 
@@ -67,6 +67,14 @@ class DataParserInterface(ABC):
             # by rl.__init__
             except AttributeError:
                 continue
+
+    @abstractmethod
+    def get_agency_fullname(self):
+        '''
+        This method returns the full name of the agency implementing this
+        interface, to be rendered in the final HTML.
+        '''
+        pass
 
     @abstractmethod
     def get_route_listing_class(self):
@@ -139,7 +147,8 @@ class DataParserInterface(ABC):
             print('Done')
             for l in listings:
                 print(l)
-        return TABLE_HTML % '\n'.join(l.to_html() for l in listings)
+        rows = '\n'.join(l.to_html() for l in listings)
+        return TABLE_HTML % (self.get_agency_fullname(), rows)
 
 class RouteListingInterface(ABC):
     '''
