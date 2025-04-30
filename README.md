@@ -36,6 +36,8 @@ In October 2024, the git and GitHub repository for this project was created (aft
 
 In summary, all King County Metro Transit and Sound Transit buses before September 2024 are included in this project, and all agencies' buses from after this point are also included. Agencies appear by default in roughly the order in which they were collected. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project (for example, the Link 2 Line at its opening), they have been revisited since December 2024 to obtain satisfactory photographs.
 
+Because git doesn't save file creation dates, it can overwrite them when checking out branches. This happened to the image files at one point. Luckily, the original "content created" file property was not touched, and it matched the creation dates perfectly, so they could be recovered.
+
 ### Included Routes
 
 Most buses are straightforwardly from one of the eight included transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites along with buses. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and many other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus.
@@ -55,7 +57,7 @@ King County Metro Transit:
 - `627` and `629` are the Duvall to Monroe and Duvall to North Bend SVT Shuttles, respectively. Snoqualmie Valley Transportation is not included in this project, as explained above (plus, there's a lack of information and complete integration and numbering for other SVT routes).
 - `634` and `636` are the Trailhead Direct buses to the Issaquah Alps and Mount Si, respectively. These are seasonal.
 - `671` through `678` are the King County RapidRide A through H lines. These are included by letter rather than by number.
-- `973` and `975` are the King County Water Taxis to Vashon Island and West Seattle, respectively.
+- `973` and `975` are the King County Water Taxis to West Seattle and Vashon Island, respectively.
 - `893`, `895`, and `981` through `994` are buses serving high schools in King County, managed by King County Metro Transit. Per the [Lakeside School website](https://www.lakesideschool.org/about-us/transportation), it is permissible to ride these as a non-student.
 
 Sound Transit:
@@ -72,7 +74,7 @@ Pierce Transit:
 
 Kitsap Transit:
 - `400` through `501` are the Kitsap Fast Ferries. For some reason, each ferry to Seattle has a different number going in each direction.
-- `600` through `638` are the [Worker/Driver](https://www.kitsaptransit.com/service/workerdriver-buses) buses, serving Naval Base Kitsap. These are permissible to ride as a civilian.
+- `600` through `638` are the [Worker/Driver](https://www.kitsaptransit.com/service/workerdriver-buses) buses, serving Naval Base Kitsap. These are permissible to ride as a civilian. They were only very recently added to OneBusAway, which is convenient.
 - `800` through `807` are the various Dial-A-Ride services Kitsap Transit provides, included because they're classified as regular routes by the agency, though only some of them have regular schedules.
 
 ### License
