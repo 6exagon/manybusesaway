@@ -34,7 +34,7 @@ In September 2024, many transit agencies updated their routes, adding new routes
 
 In October 2024, the git and GitHub repository for this project was created (after updates to get the compiler working with the updated transit websites), in order to track changes for a major update to include Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, and Skagit Transit. Such is the reason behind code-related commits in this repository. The old HTML compiler from before September 2024 is not preserved in any form.
 
-In summary, all King County Metro Transit and Sound Transit buses before September 2024 are included in this project, and all agencies' buses from after this point are also included. Agencies appear by default in roughly the order in which they were collected. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project (for example, the Link 2 Line at its opening), they have been revisited since December 2024 to obtain satisfactory photographs.
+In summary, all King County Metro Transit and Sound Transit buses immediately before September 2024 are included in this project, and all agencies' buses from after this point are also included. Agencies appear by default in roughly the order in which they were collected. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project (for example, the Link 2 Line at its opening), they have been revisited since December 2024 to obtain satisfactory photographs. Photographs must show the vehicle during operation and demonstrate which route it is on (though for some exceptional routes, this may not be obvious except to riders).
 
 Because git doesn't save file creation dates, it can overwrite them when checking out branches. This happened to the image files at one point. Luckily, the original "content created" file property was not touched, and it matched the creation dates perfectly, so they could be recovered.
 
@@ -73,7 +73,8 @@ Pierce Transit:
 - `101` is the Gig Harbor Trolley. It is seasonal and delisted out of season.
 
 Kitsap Transit:
-- `400` through `501` are the Kitsap Fast Ferries. For some reason, each ferry to Seattle has a different number going in each direction.
+- `377` is the Bainbridge Island Ferry Take-Home, which activates if the ferry is sufficiently late (or for the last trip of the evening) and replaces normal routes.
+- `400` through `501` are the Kitsap Fast Ferries. For some reason, each ferry to Seattle has a different number going in each direction, so photographs were carefully taken to both show the boats and establish their routes and directions (for those familiar with the Fast Ferry system).
 - `600` through `638` are the [Worker/Driver](https://www.kitsaptransit.com/service/workerdriver-buses) buses, serving Naval Base Kitsap. These are permissible to ride as a civilian. They were only very recently added to OneBusAway, which is convenient.
 - `800` through `807` are the various Dial-A-Ride services Kitsap Transit provides, included because they're classified as regular routes by the agency, though only some of them have regular schedules.
 
