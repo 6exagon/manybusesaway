@@ -12,7 +12,7 @@ AGENCY = 'Pierce Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'piercetransit.org/pierce-transit-routes/'
 ROUTE_PATTERN = re.compile(
-    r'<a href="([^"]+)">(?:Route )?(Stream|\d+)[^<]*<\/a><\/div>')
+    r'<a href="([^"]+)">(?:Route )?(Stream|\d+) ([^<]*)<\/a><\/div>')
 # Pierce Transit allows no options; navigation is all done through JavaScript
 
 class DataParser(DataParserInterface):
@@ -46,9 +46,13 @@ class DataParser(DataParserInterface):
                 rl = RouteListing(match.group(2))
                 self.routelistings[match.group(2)] = rl
             rl.existence = 1
-            dirgen = tp_lines_dict.pop(match.group(2))
-            rl.start, rl.dest = (
-                TP_PATTERN.fullmatch(s).group(1) for s in dirgen)
+            try:
+                dirgen = tp_lines_dict.pop(match.group(2))
+                rl.start, rl.dest = (
+                    TP_PATTERN.fullmatch(s).group(1) for s in dirgen)
+            except KeyError:
+                # Something is in the PT HTML but not the trip planner data, probably 101
+                rl.start = match.group(3)
             rl.links = tuple(match.group(1) for x in range(3))
 
 class RouteListing(RouteListingInterface):
