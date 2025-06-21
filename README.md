@@ -2,7 +2,7 @@
 
 <https://6exagon.github.io/manybusesaway>
 
-A tracker website for riding every bus of King County Metro, Sound Transit, Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, and Skagit Transit (transit agencies of Washington State, in six counties surrounding Seattle).
+A tracker website for riding every bus of King County Metro, Sound Transit, Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, Skagit Transit, and Whatcom Transportation Authority (transit agencies of Washington State, in seven counties surrounding Seattle).
 
 This project takes its name from [OneBusAway](https://onebusaway.org), an app/website serving real-time bus tracking data used _extensively_ in planning journeys in advance and in real time, without which this project would have been impossible.
 
@@ -32,7 +32,7 @@ This project was originally hosted on 000WebHost; this service was taken down du
 
 In September 2024, many transit agencies updated their routes, adding new routes and deleting many existing ones. This page shows both completed but discontinued routes, and new routes which have since been completed.
 
-In October 2024, the git and GitHub repository for this project was created (after updates to get the compiler working with the updated transit websites), in order to track changes for a major update to include Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, and Skagit Transit. Such is the reason behind code-related commits in this repository. The old HTML compiler from before September 2024 is not preserved in any form.
+In October 2024, the git and GitHub repository for this project was created (after updates to get the compiler working with the updated transit websites), in order to track changes for a major update and the inclusion of Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, Skagit Transit, and Whatcom Transportation Authority. Such is the reason behind code-related commits in this repository. The old HTML compiler from before September 2024 is not preserved in any form.
 
 In summary, all King County Metro Transit and Sound Transit buses immediately before September 2024 are included in this project, and all agencies' buses from after this point are also included. Agencies appear by default in roughly the order in which they were collected. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project (for example, the Link 2 Line at its opening), they have been revisited since December 2024 to obtain satisfactory photographs. Photographs must show the vehicle during operation and demonstrate which route it is on (though for some exceptional routes, this may not be obvious except to riders).
 
@@ -77,6 +77,9 @@ Kitsap Transit:
 - `400` through `501` are the Kitsap Fast Ferries. For some reason, each ferry to Seattle has a different number going in each direction, so photographs were carefully taken to both show the boats and establish their routes and directions (for those familiar with the Fast Ferry system).
 - `600` through `638` are the [Worker/Driver](https://www.kitsaptransit.com/service/workerdriver-buses) buses, serving Naval Base Kitsap. These are permissible to ride as a civilian. They were only very recently added to OneBusAway, which is convenient.
 - `800` through `807` are the various Dial-A-Ride services Kitsap Transit provides, included because they're classified as regular routes by the agency, though only some of them have regular schedules.
+
+Whatcom Transportation Authority:
+- `80X` from Skagit Transit is duplicated by WTA's website, but this is skipped.
 
 ### License
 
