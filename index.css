@@ -52,14 +52,14 @@ img:hover {
     filter: opacity(50%);
 }
 
+.b-x {background-color: #a69608;}
+.n-x {background-color: #bfb44d;}
 .b-king-trolley {background-color: #4f1568; color: white}
 .n-king-trolley {background-color: #ad76c4;}
 .b-king-rapidride {background-color: #b60000;}
 .n-king-rapidride {background-color: #ef5a5d;}
 .b-king-schools {background-color: #4abeba;}
 .n-king-schools {background-color: #bfcfcf;}
-.b-king-special {background-color: #a69608;}
-.n-king-special {background-color: #bfb44d;}
 .b-king-nonbus {background-color: #76bdf0; color: white}
 .n-king-nonbus {background-color: #a5d0e9;}
 .b-king-0 {background-color: #0a664f; color: white}

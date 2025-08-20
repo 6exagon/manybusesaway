@@ -5,11 +5,11 @@ See __init__.py for documentation.
 
 import re
 
-from . import DataParserInterface, RouteListingInterface
+from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
 AGENCY = 'King County Metro'
 MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
-    + 'fe-apps/schedule/09142024/js/find-a-schedule-js.js'
+    + 'fe-apps/schedule/03292025/js/find-a-schedule-js.js'
 TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
 ROUTE_PATTERN = re.compile(r'<option value="([^"]+)">(DART +)?([A-Z\d]+?)'\
     + r'(?: Line| Shuttle)? - (.*?)<\/option>')
@@ -63,7 +63,7 @@ class RouteListing(RouteListingInterface):
             num = int(self.number)
             self.css_class = str(num // 100)
             if num in range(90, 100):
-                self.css_class = 'special'
+                self.css_class = CSS_SPECIAL
             if num >= 800:
                 self.css_class = 'schools'
         elif self.number.startswith('DART'):

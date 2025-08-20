@@ -5,13 +5,13 @@ See __init__.py for documentation.
 
 import re
 
-from . import DataParserInterface, RouteListingInterface
+from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
 AGENCY = 'Community Transit'
 MAIN_URL = 'www.communitytransit.org/maps-and-schedules/'\
     + 'maps-and-schedules-by-route'
 ROUTE_PATTERN = re.compile(
-    '"route_id":"(\d{3})","route_name":"([^"]*) \| ([^"]*)","route_short_name"')
+    '"route_id":"(\d{3,4})","route_name":"([^"]*) \| ([^"]*)","route_short_name"')
 LINK_BASE = 'https://www.communitytransit.org/route/%s%s'
 LINK_OPTIONS = ('', '/table', '/0/table')
 
@@ -51,16 +51,25 @@ class RouteListing(RouteListingInterface):
         if not short_filename.isnumeric():
             raise AttributeError
         self.number = short_filename
-        series = int(self.number) // 100
-        if series == 5:
-            # Some routes shown by ST and CT both, but belong to ST
-            raise AttributeError
-        elif series == 4:
-            series = 9
-        self.css_class = str(series)
+        if len(self.number) == 4:
+            self.css_class = CSS_SPECIAL
+        else:
+            series = int(self.number) // 100
+            if series == 5:
+                # Some routes shown by ST and CT both, but belong to ST
+                raise AttributeError
+            elif series == 4:
+                series = 9
+            self.css_class = str(series)
         super().__init__()
+
+    def position(self):
+        # Most numbers are multiplied by ten, but 2401 comes after 2400 for example
+        return int(self.number.ljust(4, '0'))
 
     def displaynum(self):
         if self.css_class == '7':
             return '<p class="community-swift">Swift</p>' + self.number
+        elif self.css_class == CSS_SPECIAL:
+            return '<p class="smallnum">%s</p>' % self.number
         return self.number

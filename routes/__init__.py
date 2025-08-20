@@ -27,6 +27,7 @@ EXISTENCE_NOTES = (
 TABLE_HTML = '    <h3>%s</h3>\n    <table>\n%s\n    </table>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
+CSS_SPECIAL = 'x'
 
 class DataParserInterface(ABC):
     '''
@@ -235,7 +236,10 @@ class RouteListingInterface(ABC):
                 blank=False)
         else:
             i_td = td('')
-        full_class = self.agency + '-' + self.css_class
+        # Most CSS classes are agency-specific, there's only one that isn't
+        full_class = self.css_class
+        if self.css_class != CSS_SPECIAL:
+            full_class = self.agency + '-' + full_class
         displaystart = self.start.replace('&', '&amp;')
         if len(self.dest):
             displaydest = self.dest.replace('&', '&amp;')
