@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from time import time
 from sys import stderr
 
-from . import DataParserInterface, RouteListingInterface
+from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
 AGENCY = 'Kitsap Transit'
 # This isn't even everything we need
@@ -25,6 +25,8 @@ ROUTE_PATTERN = re.compile(
 LINK_BASE = 'https://www.kitsaptransit.com/service'
 # Kitsap Transit allows no options; everything is listed on the pages
 # themselves in an inconsistent format
+# Early South and Early North should be special
+SPECIAL_ROUTES = ('626', '635')
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -118,6 +120,8 @@ class RouteListing(RouteListingInterface):
         elif series == 5:
             series = 4
         self.css_class = str(series)
+        if self.number in SPECIAL_ROUTES:
+            self.css_class = CSS_SPECIAL
         super().__init__()
 
 # The following is all to fetch the kttracker listings

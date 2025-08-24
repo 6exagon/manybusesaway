@@ -237,21 +237,22 @@ class RouteListingInterface(ABC):
         else:
             i_td = td('')
         # Most CSS classes are agency-specific, there's only one that isn't
-        full_class = self.css_class
-        if self.css_class != CSS_SPECIAL:
-            full_class = self.agency + '-' + full_class
+        if self.css_class == CSS_SPECIAL:
+            final_class = CSS_SPECIAL
+        else:
+            final_class = self.agency + '-' + self.css_class
         displaystart = self.start.replace('&', '&amp;')
         if len(self.dest):
             displaydest = self.dest.replace('&', '&amp;')
-            start_td = td(displaystart, 'n-' + full_class, link=self.links[1])
-            dest_td = td(displaydest, 'n-' + full_class, link=self.links[2])
+            start_td = td(displaystart, 'n-' + final_class, link=self.links[1])
+            dest_td = td(displaydest, 'n-' + final_class, link=self.links[2])
         else:
             start_td = td(
-                displaystart, 'n-' + full_class, link=self.links[1], span=True)
+                displaystart, 'n-' + final_class, link=self.links[1], span=True)
             # There is no destination, so this is what will be substituted in
             dest_td = ''
         return ROW_HTML % (
-            td(self.displaynum(), 'b-' + full_class, link=self.links[0]),
+            td(self.displaynum(), 'b-' + final_class, link=self.links[0]),
             start_td,
             dest_td,
             td(*EXISTENCE_NOTES[self.existence]),

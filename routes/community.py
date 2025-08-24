@@ -68,8 +68,8 @@ class RouteListing(RouteListingInterface):
         return int(self.number.ljust(4, '0'))
 
     def displaynum(self):
-        if self.css_class == '7':
-            return '<p class="community-swift">Swift</p>' + self.number
-        elif self.css_class == CSS_SPECIAL:
+        if self.css_class == CSS_SPECIAL:
             return '<p class="smallnum">%s</p>' % self.number
+        elif self.css_class == '7':
+            return '<p class="community-swift">Swift</p>' + self.number
         return self.number

@@ -6,7 +6,7 @@ See __init__.py for documentation.
 from json import loads
 import re
 
-from . import DataParserInterface, RouteListingInterface, TP_REQ, TP_PATTERN
+from . import DataParserInterface, RouteListingInterface, TP_REQ, TP_PATTERN, CSS_SPECIAL
 
 AGENCY = 'Pierce Transit'
 # Used only for the schedule links, inadequate for route descriptions
@@ -14,6 +14,8 @@ MAIN_URL = 'piercetransit.org/pierce-transit-routes/'
 ROUTE_PATTERN = re.compile(
     r'<a href="([^"]+)">(?:Route )?(Stream|\d+) ([^<]*)<\/a><\/div>')
 # Pierce Transit allows no options; navigation is all done through JavaScript
+# Gig Harbor Trolley should be special
+SPECIAL_ROUTES = ('101',)
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -61,6 +63,8 @@ class RouteListing(RouteListingInterface):
         self.agency = 'pierce'
         self.number = short_filename
         self.css_class = ''
+        if self.number in SPECIAL_ROUTES:
+            self.css_class = CSS_SPECIAL
         super().__init__()
 
     def position(self):
