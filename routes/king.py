@@ -9,7 +9,7 @@ from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
 AGENCY = 'King County Metro'
 MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
-    + 'fe-apps/schedule/03292025/js/find-a-schedule-js.js'
+    + 'fe-apps/schedule/08302025/js/find-a-schedule-js.js'
 TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
 ROUTE_PATTERN = re.compile(r'<option value="([^"]+)">(DART +)?([A-Z\d]+?)'\
     + r'(?: Line| Shuttle)? - (.*?)<\/option>')
