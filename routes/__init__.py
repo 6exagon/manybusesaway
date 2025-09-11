@@ -10,9 +10,10 @@ import os
 import re
 from datetime import datetime
 
-# These two constants are imported for Pierce Transit and Everett Transit routes
+# These two constants are imported for Pierce Transit routes
 # Though they could be, they're not used for other agencies
 # This is because they're less accurate and well-maintained as a source
+# For better portability, they should remain here
 TP_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
     {'version': '1.1', 'method': 'GetLines'}))
 TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (?:.*?\/ )*?([^\/]*?)(?: via .*)?')

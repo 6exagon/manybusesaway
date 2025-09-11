@@ -11,11 +11,11 @@ from requests import request_all
 AGENCY = 'Intercity Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'www.intercitytransit.com/plan-your-trip/routes'
-ROUTE_PATTERN = re.compile(r'value="([\w\d]+)">\1.*\W ([\w\d\s\/]*)<')
+ROUTE_PATTERN = re.compile(r'value="[\w\d]+">([\w\d]+) \W ([\w\d\s\/]*)<')
 # Intercity Transit allows no options; navigation is all done through JavaScript
-TERMS_PATTERN = re.compile(r'Outbound Stops[\s\w\d\/<>]*?<tbody>\s*'\
-    + r'<tr class=\"timepoint\">\s*<th>\s*(.*?)(?: \[\wb\])?\n[\w\W]*'\
-    + r'<tr class=\"timepoint\">\s*<th>\s*(.*?)(?: \[\wb\])?\n[\w\W]*</table>')
+# This pattern should match twice, once for the top of the table each direction
+TERMS_PATTERN = re.compile(r'<tbody>\s*<tr class="timepoint".*>\s*'\
+    + r'<th.*>\s*(.*?)(?:\s\[\wb\])?\s*<\/th>')
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -72,12 +72,17 @@ class RouteListing(RouteListingInterface):
         Intercity Transit routes each require a separate webpage to be loaded
         and parsed.
         '''
-        match = TERMS_PATTERN.search(resource)
-        if match:
-            self.start, self.dest = match.group(1), match.group(2)
-            # Catch all the Olympia start ones, and use self.desc if so (mostly)
+        try:
+            self.dest, self.start = (
+                match.group(1) for match in TERMS_PATTERN.finditer(resource))
             if self.start == 'Olympia Transit Center' and '/' not in self.desc:
                 self.dest = self.desc
+            if self.number in ('600', '610'):
+                # Both methods of assigning these are unsatisfactory
+                self.dest = 'SR 512 P&R'
+        except ValueError:
+            # It's alright if this assignment is impossible
+            pass
 
     def displaynum(self):
         if self.number == 'ONE':
