@@ -56,7 +56,11 @@ class DataParser(DataParserInterface):
             if num in self.routelistings:
                 rl = self.routelistings[num]
             else:
-                rl = RouteListing(num)
+                try:
+                    rl = RouteListing(num)
+                except AttributeError:
+                    # Raised on the anomalous misprint TA027 Task on the tracker
+                    continue
                 self.routelistings[num] = rl
             rl.existence = 1
             rl.start = map['rtnm']
