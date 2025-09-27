@@ -78,7 +78,7 @@ Kitsap Transit:
 - `800` through `807` are the various Dial-A-Ride services Kitsap Transit provides, included because they're classified as regular routes by the agency, though only some of them have regular schedules.
 
 Whatcom Transportation Authority:
-- `80X` from Skagit Transit is duplicated by WTA's website, but this is skipped.
+- `80X` is jointly operated by Skagit Transit and WTA, but this is skipped.
 
 ### License
 
