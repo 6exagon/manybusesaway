@@ -21,7 +21,7 @@ AGENCY = 'Kitsap Transit'
 MAIN_URL = 'kttracker.com/assets/ta/kitsaptransit/config.json'
 WORKER_DRIVER_URL = 'www.kitsaptransit.com/service/workerdriver-buses/'
 ROUTE_PATTERN = re.compile(
-    r'(?:([\w\s]+)(?:[^\s\w]|\sto\s))?([\w\s]+?)(?:\sF\w\w\w\sFerry)?')
+    r'(?:([\w\s]+)(?:[^\s\w\.]|\sto\s))?([\w\s\.]+?)(?:\sF\w\w\w\sFerry)?')
 LINK_BASE = 'https://www.kitsaptransit.com/service'
 # Kitsap Transit allows no options; everything is listed on the pages
 # themselves in an inconsistent format

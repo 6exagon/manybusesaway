@@ -68,8 +68,8 @@ img:hover {
 .n-king-1 {background-color: #69acb8;}
 .b-king-2 {background-color: #1f279c; color: white}
 .n-king-2 {background-color: #6a72de;}
-.b-king-3 {background-color: #009e9b;}
-.n-king-3 {background-color: #7acccb;}
+.b-king-3 {background-color: #348289;}
+.n-king-3 {background-color: #7ec7ca;}
 .b-king-7 {background-color: #13006a; color: white}
 .n-king-7 {background-color: #7370c0;}
 .b-sound-0 {background-color: #002670;}
@@ -102,12 +102,10 @@ img:hover {
 .n-kitsap-6 {background-color: #f0fdff;}
 .b-kitsap-8 {background-color: #256fa4; color: white}
 .n-kitsap-8 {background-color: #badfe6;}
-.b-skagit-X {background-color: #41914a; color: white}
-.n-skagit-X {background-color: #9ed9a3;}
 .b-skagit- {background-color: #194122; color: white}
 .n-skagit- {background-color: #fbfffb;}
-.b-whatcom- {background-color: #002c90; color: white}
-.n-whatcom- {background-color: #81d6f7;}
+.b-whatcom- {background-color: #3f968e;}
+.n-whatcom- {background-color: #71bfbd;}
 
 .king-dart {
     color: #ef2400;
@@ -148,6 +146,9 @@ img:hover {
     line-height: 30px;
     border-radius: 50%;
     margin: 0 auto;
+}
+.mediumnum {
+    font-size: 16px;
 }
 .smallnum {
     font-size: 13px;

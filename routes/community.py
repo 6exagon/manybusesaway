@@ -5,7 +5,7 @@ See __init__.py for documentation.
 
 import re
 
-from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
+from . import DataParserInterface, RouteListingInterface
 
 AGENCY = 'Community Transit'
 MAIN_URL = 'www.communitytransit.org/maps-and-schedules/'\
@@ -51,25 +51,21 @@ class RouteListing(RouteListingInterface):
         if not short_filename.isnumeric():
             raise AttributeError
         self.number = short_filename
-        if len(self.number) == 4:
-            self.css_class = CSS_SPECIAL
-        else:
-            series = int(self.number) // 100
-            if series == 5:
-                # Some routes shown by ST and CT both, but belong to ST
-                raise AttributeError
-            elif series == 4:
-                series = 9
-            self.css_class = str(series)
+        series = int(self.number) // 100
+        if series == 5:
+            # Some routes shown by ST and CT both, but belong to ST
+            raise AttributeError
+        elif series == 4:
+            series = 9
+        self.css_class = str(series)
         super().__init__()
 
     def position(self):
         # Most numbers are multiplied by ten, but 2401 comes after 2400 for example
+        # Kept for forwards compatibility
         return int(self.number.ljust(4, '0'))
 
     def displaynum(self):
-        if self.css_class == CSS_SPECIAL:
-            return '<p class="smallnum">%s</p>' % self.number
-        elif self.css_class == '7':
+        if self.css_class == '7':
             return '<p class="community-swift">Swift</p>' + self.number
         return self.number

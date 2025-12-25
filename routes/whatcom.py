@@ -55,13 +55,15 @@ class RouteListing(RouteListingInterface):
         # This could be gotten from higher up, but this is a sanity check
         self.agency = 'whatcom'
         self.number = short_filename
-        if self.number == '80X':
-            # This route shown by ST and WTA both, but seems to belong more to ST
-            raise AttributeError
         self.css_class = ''
         super().__init__()
 
     def position(self):
         if self.number.isnumeric():
             return int(self.number)
-        return int(self.number[:-1])
+        return int(self.number[:-1]) + 0.5
+
+    def displaynum(self):
+        if self.number.endswith('S'):
+            return '<p class="mediumnum">%s</p>' % self.number
+        return self.number

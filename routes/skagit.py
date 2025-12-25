@@ -77,10 +77,8 @@ class RouteListing(RouteListingInterface):
         # This could be gotten from higher up, but this is a sanity check
         self.agency = 'skagit'
         self.number = short_filename
-        self.css_class = 'X' * self.number.endswith('X')
+        self.css_class = ''
         super().__init__()
 
     def position(self):
-        if self.number.isnumeric():
-            return int(self.number)
-        return int(self.number[:-1])
+        return int(self.number.rstrip('X'))

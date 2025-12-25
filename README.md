@@ -40,13 +40,13 @@ Because git doesn't save file creation dates, it can overwrite them when checkin
 
 Most buses are straightforwardly from one of the nine included transit agencies, and these should be obvious. However, there are many unusual buses or modes of transportation listed on transit agency websites along with buses. Internal numbers are used for this project, retrieved from the [King County GIS Open Data map](https://gis-kingcounty.opendata.arcgis.com/datasets/51714753981a4c2695e603832c953551_2647) and many other sources, but these may not always be visible on vehicles. Note that the compiler cannot properly parse many of these, as they're named irregularly in menus.
 
-Transportation methods not seemingly classified as buses and found in the same listings (Vanpool-type services, ferries, paratransit, etc.) are not included. In addition, one-off improvised/emergency services do not count; routes must be at least theoretically recurring services that have their own listings. This excludes the King County Metro/Sound Transit April 2025 construction [Circulator](https://www.soundtransit.org/get-to-know-us/news-events/news-releases/1-line-service-disrupted-repair-work-april-14-to-23) bus (though this was completed), the Intercity Transit Nightline service (which is just an extension to an existing route), and many others, though it still leaves many edge cases to be included.
+Transportation methods not seemingly classified as buses and found in the same listings (Vanpool-type services, ferries, paratransit, etc.) are not included. In addition, one-off improvised/emergency services do not count; routes must be at least theoretically recurring services that have their own listings. This excludes the King County Metro/Sound Transit April 2025 construction [Circulator](https://www.soundtransit.org/get-to-know-us/news-events/news-releases/1-line-service-disrupted-repair-work-april-14-to-23) bus (though this was completed), the Intercity Transit Nightline service (which is just an extension to an existing route), and many others. It still leaves many edge cases to be included, though.
 
 Only official [transit agencies](https://www.wsdot.wa.gov/publications/manuals/fulltext/M3079/spt.pdf) as considered by WSDOT, of which there are currently 32, are included. This is for many reasons, but especially the fact that there's no other clear way to delineate official and public routes. So, tribal transportation providers, community transportation providers, the Travel Washington Intercity Bus Program, Washington State Ferries, Amtrak, school buses, etc. are not included. Examples include Snoqualmie Valley Transportation, ruralTransit, the SDOT/Solid Ground Circulator, the Seattle Monorail, and so many more.
 
 ### Edge Cases
 
-King County Metro Transit:
+_King County Metro Transit_
 - `90` is the King County Metro Transit snow shuttle. It is very seldom operational (only during inclement weather), and the service advisories announcing it are inconsistent. It is certainly the most challenging bus to collect.
 - `96` is the First Hill Seattle Streetcar.
 - `97` is the Link Shuttle, a semi-permanent replacement for Sound Transit Link trains that are not operational.
@@ -58,27 +58,28 @@ King County Metro Transit:
 - `973` and `975` are the King County Water Taxis to West Seattle and Vashon Island, respectively.
 - `893`, `895`, and `981` through `994` are buses serving high schools in King County, managed by King County Metro Transit. Per the [Lakeside School website](https://www.lakesideschool.org/about-us/transportation), it is permissible to ride these as a non-student.
 
-Sound Transit:
+_Sound Transit_
 - The Link 1 Line, 2 Line, and T Line are included by name.
 - The Sounder N Line and S Line are both included by name.
 
-Community Transit:
-- `2401` is a temporary replacement shuttle bus for the `240`, which was split into two routes for a prolonged construction period in the summer of 2025. It is included by number rather than by name, and it was included because it does have its own schedule page and appears alongside all the rest of the routes, though it's certainly in the gray area as its duration is limited to approximately two months.
+_Community Transit_
+- `2401` was a temporary replacement shuttle bus for the `240`, which was split into two routes for a prolonged construction period in the summer of 2025. Though it did have its own schedule page and appeared alongside all the rest of the routes, because its duration was limited to approximately two months it isn't included anymore.
 - `701`, `702`, and `703` are Swift Blue, Green, and Orange, respectively. These are included by number rather than by name.
 - Some Sound Transit routes that serve Snohomish County are duplicated by Community Transit's website, but these are skipped.
 
-Pierce Transit:
+_Pierce Transit_
 - The Stream Community Line is included by name.
 - `101` is the Gig Harbor Trolley. It is seasonal and delisted out of season.
 
-Kitsap Transit:
-- `377` is the Bainbridge Island Ferry Take-Home, which activates if the ferry is sufficiently late (or for the last trip of the evening) and replaces normal routes.
+_Kitsap Transit_
+- `377` was the Bainbridge Island Ferry Take-Home, which activated if the ferry is sufficiently late (or for the last trip of the evening) and replaced normal routes. Though I did ride it before its removal, I was unable to take a satisfactory picture of it. It's also in the gray area for inclusion.
 - `400` through `501` are the Kitsap Fast Ferries. For some reason, each ferry to Seattle has a different number going in each direction, so photographs were carefully taken to both show the boats and establish their routes and directions (for those familiar with the Fast Ferry system).
 - `600` through `638` are the [Worker/Driver](https://www.kitsaptransit.com/service/workerdriver-buses) buses, serving Naval Base Kitsap. These are permissible to ride as a civilian. They were only very recently added to OneBusAway, which is convenient.
 - `800` through `807` are the various Dial-A-Ride services Kitsap Transit provides, included because they're classified as regular routes by the agency, though only some of them have regular schedules.
 
-Whatcom Transportation Authority:
-- `80X` is jointly operated by Skagit Transit and WTA, but this is skipped.
+_Skagit Transit_ and _Whatcom Transportation Authority_
+- `80X` is operated by both Skagit Transit and WTA, with all trips being consistently operated by one of the two agencies (enumerated in some versions of the schedules). Though they take the same path, they have been analyzed as two separate route listings for the two agencies and both have been completed.
+- `14S`, `105S`, and `190S` are WTA "shuttle"/spur routes based on the regular versions of those routes that operate only when WWU is in session.
 
 ### License
 
