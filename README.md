@@ -78,6 +78,7 @@ _Kitsap Transit_
 - `800` through `807` are the various Dial-A-Ride services Kitsap Transit provides, included because they're classified as regular routes by the agency, though only some of them have regular schedules.
 
 _Skagit Transit_ and _Whatcom Transportation Authority_
+- `75` has both `75A` and `75B` variations for skipping different stops, but it's counted as one route by WTA.
 - `80X` is operated by both Skagit Transit and WTA, with all trips being consistently operated by one of the two agencies (enumerated in some versions of the schedules). Though they take the same path, they have been analyzed as two separate route listings for the two agencies and both have been completed.
 - `14S`, `105S`, and `190S` are WTA "shuttle"/spur routes based on the regular versions of those routes that operate only when WWU is in session.
 
