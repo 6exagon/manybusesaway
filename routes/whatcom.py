@@ -10,9 +10,9 @@ from . import DataParserInterface, RouteListingInterface
 AGENCY = 'Whatcom Transportation Authority'
 MAIN_URL = 'schedules.ridewta.com/data/wta-static-gtfs/routes.txt'
 ROUTE_PATTERN = re.compile('\n(.*?)(?:,\w*?){3}(?:([^,]+)&)?([^,]+)')
-# The schedule always takes a moment to load, unfortunately, at least on some browsers
+# The schedule takes time to load, at least on some browsers
 LINK_BASE = 'https://schedules.ridewta.com/#route-details?routeNum='
-# Whatcom Transportation Authority allows no options; navigation is all done through JavaScript
+# WTA allows no options; navigation is all done through JavaScript
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -32,11 +32,7 @@ class DataParser(DataParserInterface):
             if match.group(1) in self.routelistings:
                 rl = self.routelistings[match.group(1)]
             else:
-                try:
-                    rl = RouteListing(match.group(1))
-                except AttributeError:
-                    # Raised on Skagit Transit duplicate
-                    continue
+                rl = RouteListing(match.group(1))
                 self.routelistings[match.group(1)] = rl
             rl.existence = 1
             if match.group(2):
