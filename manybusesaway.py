@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.1.b0
+ManyBusesAway v4.1.b1
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -19,7 +19,7 @@ from requests import request_all
 
 DEFAULT_AGENCIES_ORDER = (
     'king', 'sound', 'everett', 'community', 'pierce', 'intercity',
-    'kitsap', 'skagit', 'whatcom', 'lewis')
+    'kitsap', 'skagit', 'whatcom', 'lewis', 'central')
 
 FINAL_HTML = '''
 <!DOCTYPE html>

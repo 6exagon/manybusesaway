@@ -2,7 +2,7 @@
 
 <https://6exagon.github.io/manybusesaway>
 
-A tracker website for riding every bus of King County Metro, Sound Transit, Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, Skagit Transit, Whatcom Transportation Authority, and Lewis County Transit (transit agencies of Washington State, in eight counties surrounding Seattle).
+A tracker website for riding every bus of King County Metro, Sound Transit, Everett Transit, Community Transit, Pierce Transit, Intercity Transit, Kitsap Transit, Skagit Transit, Whatcom Transportation Authority, Lewis County Transit, and Central Transit (transit agencies of Washington State, in nine counties surrounding Seattle).
 
 This project takes its name from [OneBusAway](https://onebusaway.org), an app/website serving real-time bus tracking data used _extensively_ in planning journeys in advance and in real time, without which this project would have been impossible.
 
@@ -20,7 +20,7 @@ The [images](images) folder contains real photographs of buses for each route, t
 
 If you want to try this challenge yourself, replacing the contents of the images folder with any number of your own square images (whose filenames follow the same naming conventions) and then running `python3 manybusesaway.py -i images` from the project directory should produce a corresponding index.html file. Images are recommended to have dimensions that are a multiple of 100 pixels; photographs here were downsized to 500x500 for consistency and smaller file sizes. Most bitmap image formats are acceptable, and even animated .gif and .apng images will render properly in most browsers.
 
-Any directory can be specified instead of `images`; however, this must be a relative path and this script must be executed from the website root directory for image links to work correctly. `-i images` can also be omitted if no images are to be included. Additionally, `-o <file>` can be used to change the filename to output to, and the `-v` flag can be used for verbose output. Finally, a variable number of arguments can be specified at the end for which agencies to use and in what order; the default is `king sound everett community pierce intercity kitsap skagit whatcom lewis`.
+Any directory can be specified instead of `images`; however, this must be a relative path and this script must be executed from the website root directory for image links to work correctly. `-i images` can also be omitted if no images are to be included. Additionally, `-o <file>` can be used to change the filename to output to, and the `-v` flag can be used for verbose output. Finally, a variable number of arguments can be specified at the end for which agencies to use and in what order; the default is `king sound everett community pierce intercity kitsap skagit whatcom lewis central`.
 
 Please leave a credit link to this repository at the bottom of the generated HTML output.
 
@@ -81,6 +81,9 @@ _Skagit Transit_ and _Whatcom Transportation Authority_
 - `75` has both `75A` and `75B` variations for skipping different stops, but it's counted as one route by WTA.
 - `80X` is operated by both Skagit Transit and WTA, with all trips being consistently operated by one of the two agencies (enumerated in some versions of the schedules). Though they take the same path, they have been analyzed as two separate route listings for the two agencies and both have been completed.
 - `14S`, `105S`, and `190S` are WTA "shuttle"/spur routes based on the regular versions of those routes that operate only when WWU is in session.
+
+_Central Transit_
+- `12A` and `12B` take exactly the same path, but with different schedules. They're counted as separate routes by CT though.
 
 ### License
 
