@@ -108,10 +108,14 @@ img:hover {
 .n-whatcom- {background-color: #71bfbd;}
 .b-lewis- {background-color: #07253b; color: white}
 .n-lewis- {background-color: #b2b6bb;}
-.b-central- {background-color: #3ba0e3; color: white}
-.n-central- {background-color: #ffffff;}
 .b-pacific- {background-color: #083a76; color: white}
 .n-pacific- {background-color: #7ecece;}
+.b-grays- {background-color: #377a30; color: white}
+.n-grays- {background-color: #f4fff4;}
+.b-grays-harborflex {background-color: #a02720; color: white}
+.n-grays-harborflex {background-color: #fff4f4;}
+.b-central- {background-color: #3ba0e3; color: white}
+.n-central- {background-color: #ffffff;}
 
 .king-dart {
     color: #ef2400;
