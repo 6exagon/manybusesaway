@@ -53,11 +53,6 @@ class RouteListing(RouteListingInterface):
             self.css_class = '0'
         super().__init__()
 
-    def position(self):
-        if self.number.isnumeric():
-            return int(self.number)
-        return ord(self.number[0]) - 256
-
     def displaynum(self):
         if len(self.number) != 1:
             return self.number

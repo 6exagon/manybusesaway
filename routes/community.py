@@ -60,11 +60,6 @@ class RouteListing(RouteListingInterface):
         self.css_class = str(series)
         super().__init__()
 
-    def position(self):
-        # Most numbers are multiplied by ten, but 2401 comes after 2400 for example
-        # Kept for forwards compatibility
-        return int(self.number.ljust(4, '0'))
-
     def displaynum(self):
         if self.css_class == '7':
             return '<p class="community-swift">Swift</p>' + self.number

@@ -48,8 +48,3 @@ class RouteListing(RouteListingInterface):
         self.number = short_filename
         self.css_class = ''
         super().__init__()
-
-    def position(self):
-        # This lexicographic ordering works, at least with the current routes
-        # There's actually a route_sort_order key we ignore in each dictionary
-        return self.number

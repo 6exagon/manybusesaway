@@ -54,11 +54,6 @@ class RouteListing(RouteListingInterface):
         self.css_class = ''
         super().__init__()
 
-    def position(self):
-        if self.number.isnumeric():
-            return int(self.number)
-        return int(self.number[:-1]) + 0.5
-
     def displaynum(self):
         if self.number.endswith('S'):
             return '<p class="mediumnum">%s</p>' % self.number

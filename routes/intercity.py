@@ -59,14 +59,6 @@ class RouteListing(RouteListingInterface):
         self.css_class = ''
         super().__init__()
 
-    def position(self):
-        if self.number.isnumeric():
-            return int(self.number) * 256
-        elif self.number[:-1].isnumeric():
-            return int(self.number[:-1]) * 256 + ord(self.number[-1])
-        else:
-            return 0
-
     def parse_termini(self, resource):
         '''
         Intercity Transit routes each require a separate webpage to be loaded

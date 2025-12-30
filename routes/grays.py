@@ -74,8 +74,3 @@ class RouteListing(RouteListingInterface):
         if self.number.isnumeric() and len(self.number) == 3:
             self.css_class = 'harborflex'
         super().__init__()
-
-    def position(self):
-        if self.number.isnumeric():
-            return int(self.number)
-        return int(self.number[:-1]) + 0.5

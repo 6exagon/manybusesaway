@@ -79,6 +79,3 @@ class RouteListing(RouteListingInterface):
         self.number = short_filename
         self.css_class = ''
         super().__init__()
-
-    def position(self):
-        return int(self.number.rstrip('X'))

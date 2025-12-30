@@ -201,10 +201,20 @@ class RouteListingInterface(ABC):
         '''
         Sets position value relative to other RouteListings from this agency.
         This is used for comparisons. Default may be commonly used, but if any
-        route for this agency has a non-numeric name, it will need overriding.
+        route for this agency has an unusual name, it will need overriding.
+        In particular, if an agency uses only route numbers in the form of
+        \d*\w, or if portions after the first letter in alphabetical numbers
+        need not be discriminated, this method will suffice.
         '''
-        # This will cause ValueError on failure, indicating need for overriding
-        return int(self.number)
+        if self.number.isnumeric():
+            return int(self.number)
+        numerical_part_maybe = self.number[:-1]
+        # ''.isnumeric() is False
+        if numerical_part_maybe.isnumeric():
+            # This allows '10' < '10N' < '10S' for example
+            return int(numerical_part_maybe) + ord(self.number[-1]) / 256
+        # This allows 'A' < 'B' < '1'
+        return ord(self.number[0]) - 256
 
     def set_links(self, linkbase, linkpiece, linkoptions):
         '''
