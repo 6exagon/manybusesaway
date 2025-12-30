@@ -113,6 +113,23 @@ class DataParserInterface(ABC):
         '''
         pass
 
+    def get_add_routelisting(self, number):
+        '''
+        This method retrieves and returns the RouteListing value for the key
+        string number from self.routelistings if it exists. Otherwise, it
+        creates a new RouteListing specific to this agency and then returns it,
+        adding it to self.routelistings. This is a combination of a dictionary
+        get method and a defaultdict.
+        If an AttributeError is raised on the creation of a RouteListing, the
+        RouteListing will not be added to self.routelistings and the exception
+        will propagate.
+        '''
+        rl = self.routelistings.get(number)
+        if not rl:
+            rl = self.get_route_listing_class()(number)
+            self.routelistings[number] = rl
+        return rl
+
     def sanitize_strings(self):
         '''
         Independently of agency-specific code, makes known string fixes to
@@ -216,14 +233,18 @@ class RouteListingInterface(ABC):
         # This allows 'A' < 'B' < '1'
         return ord(self.number[0]) - 256
 
-    def set_links(self, linkbase, linkpiece, linkoptions):
+    def set_links(self, link, linkoptions=None):
         '''
-        Sets tuple self.links to string linkbase formatted with string linkpiece
-        and each of the strings in tuple linkoptions.
+        Sets tuple self.links to string link concatenated to each of the
+        strings in tuple linkoptions.
         This allows each td in this RouteListing's tr to have a different but
         related link.
+        linkoptions is optional if there are no options.
         '''
-        self.links = tuple(linkbase % (linkpiece, o) for o in linkoptions)
+        if linkoptions:
+            self.links = tuple(link + o for o in linkoptions)
+        else:
+            self.links = tuple(link for x in range(3))
 
     def sanitize_strings(self):
         '''Sanitizes self.start and self.dest to fix known inconsistencies.'''

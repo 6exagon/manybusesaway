@@ -11,7 +11,7 @@ from . import DataParserInterface, RouteListingInterface
 AGENCY = 'Central Transit'
 MAIN_URL = 'gtfs-api.trilliumtransit.com/gtfs-api/routes/by-feed/ellensburg-wa-us'
 PATH_PATTERN = re.compile(r'(.+?)(?: \(\w+\))? to (.+?)(?: \(\w+\))?(?: via .+)?')
-# Central Transit allows no options; navigation is all done through JavaScript
+# Allows no options; navigation is all done through JavaScript
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -29,17 +29,12 @@ class DataParser(DataParserInterface):
             return
         json_list = loads(json)
         for i in json_list:
-            num = i['route_short_name']
-            if num in self.routelistings:
-                rl = self.routelistings[num]
-            else:
-                rl = RouteListing(num)
-                self.routelistings[num] = rl
+            rl = self.get_add_routelisting(i['route_short_name'])
             rl.existence = 1
             match = PATH_PATTERN.fullmatch(i['route_long_name'])
             rl.start = match.group(1)
             rl.dest = match.group(2)
-            rl.links = tuple(i['route_url'] for x in range(3))
+            rl.set_links(i['route_url'])
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

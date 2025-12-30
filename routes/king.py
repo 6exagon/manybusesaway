@@ -14,10 +14,10 @@ TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
 ROUTE_PATTERN = re.compile(r'<option value="([^"]+)">(DART +)?([A-Z\d]+?)'\
     + r'(?: Line| Shuttle)? - (.*?)<\/option>')
 SERVICE_PATTERN = re.compile(r'Service between (.*) and (?:the | )(.*)')
-LINK_BASE = 'https://kingcounty.gov%s#%s'
+LINK_BASE = 'https://kingcounty.gov'
 # King is the only reliable agency for route directions corresponding to
 # listing order, unfortunately
-LINK_OPTIONS = ('route-map', 'weekday', 'weekday-b')
+LINK_OPTIONS = ('#route-map', '#weekday', '#weekday-b')
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -42,14 +42,10 @@ class DataParser(DataParserInterface):
                 number = match.group(2).rstrip() + match.group(3)
             else:
                 number = match.group(3)
-            if number in self.routelistings:
-                rl = self.routelistings[number]
-            else:
-                rl = RouteListing(number)
-                self.routelistings[number] = rl
+            rl = self.get_add_routelisting(number)
             rl.existence = 1
             rl.parse_termini(match.group(4))
-            rl.set_links(LINK_BASE, match.group(1), LINK_OPTIONS)
+            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
             if 'Route ' + rl.number in trolley_html:
                 rl.css_class = 'trolley'
 

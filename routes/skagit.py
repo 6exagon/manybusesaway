@@ -16,7 +16,7 @@ MAIN_URL = 'www.skagittransit.org/routes/'
 ROUTE_PATTERN = re.compile(r'<a href="[^"]*?(\/[^\/]+\/)"[^>]*>(\d+X?)[ \W]*'\
     + r'((?:\s?[A-Z][a-z]+\.?(?: -)?)+)(?:\s?(?:to|[\w\s\.\/]+?)\s?'\
     + r'([\w\s\.]*))?<')
-LINK_BASE = 'https://www.skagittransit.org/%s%s'
+LINK_BASE = 'https://www.skagittransit.org/'
 LINK_OPTIONS = (
     '#maincontent',
     '#CT_PageHeading_0_hschedule',
@@ -45,13 +45,9 @@ class DataParser(DataParserInterface):
         # Termini are not visible until we make this request
         timetable_requests = []
         for match in ROUTE_PATTERN.finditer(html):
-            if match.group(2) in self.routelistings:
-                rl = self.routelistings[match.group(2)]
-            else:
-                rl = RouteListing(match.group(2))
-                self.routelistings[match.group(2)] = rl
+            rl = self.get_add_routelisting(match.group(2))
             rl.existence = 1
-            rl.set_links(LINK_BASE, match.group(1), LINK_OPTIONS)
+            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
             if match.group(4):
                 rl.start = match.group(3)
                 rl.dest = match.group(4)

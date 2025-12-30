@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.1.b4
+ManyBusesAway v4.1.b5
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;

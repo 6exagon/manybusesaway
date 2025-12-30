@@ -23,8 +23,7 @@ WORKER_DRIVER_URL = 'www.kitsaptransit.com/service/workerdriver-buses/'
 ROUTE_PATTERN = re.compile(
     r'(?:([\w\s]+)(?:[^\s\w\.]|\sto\s))?([\w\s\.]+?)(?:\sF\w\w\w\sFerry)?')
 LINK_BASE = 'https://www.kitsaptransit.com/service'
-# Kitsap Transit allows no options; everything is listed on the pages
-# themselves in an inconsistent format
+# Allows no options; everything is listed on the pages inconsistently
 # Early South and Early North should be special
 SPECIAL_ROUTES = ('626', '635')
 
@@ -53,15 +52,11 @@ class DataParser(DataParserInterface):
 
         for map in tracker_list:
             num = map['rt']
-            if num in self.routelistings:
-                rl = self.routelistings[num]
-            else:
-                try:
-                    rl = RouteListing(num)
-                except AttributeError:
-                    # Raised on the anomalous misprint TA027 Task on the tracker
-                    continue
-                self.routelistings[num] = rl
+            try:
+                rl = self.get_add_routelisting(num)
+            except AttributeError:
+                # Raised on the anomalous misprint TA027 Task on the tracker
+                continue
             rl.existence = 1
             rl.start = map['rtnm']
             if num.startswith('6'):
@@ -92,16 +87,14 @@ class DataParser(DataParserInterface):
                 ptn = wd_html.partition('/routed-buses/' + num)
             # If this part fails, that's ok; a '' link will send you to the
             # main service page
-            rl.links = tuple(
-                LINK_BASE + ptn[1] + ptn[2].partition('"')[0] for x in range(3))
+            rl.set_links(LINK_BASE + ptn[1] + ptn[2].partition('"')[0])
 
         for key, value in link_dict.items():
             if int(key) < 400:
                 # This resource is out of date for all regular buses
                 continue
-            if key in self.routelistings:
-                rl = self.routelistings[key]
-            else:
+            rl = self.routelistings.get(key)
+            if not rl:
                 rl = RouteListing(key)
                 self.routelistings[key] = rl
                 # Get its description from the Worker/Driver HTML,
@@ -109,7 +102,7 @@ class DataParser(DataParserInterface):
                 rl.existence = 1
                 rl.start = wd_html.partition(value + '">')[2].partition('<')[0]
                 rl.start.rstrip()
-            rl.links = tuple((LINK_BASE + value) for x in range(3))
+            rl.set_links(LINK_BASE + value)
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

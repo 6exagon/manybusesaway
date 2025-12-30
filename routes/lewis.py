@@ -11,7 +11,8 @@ AGENCY = 'Lewis County Transit'
 MAIN_URL = 'lewiscountytransit.org/bus-routes/'
 ROUTE_PATTERN = re.compile(r'--route-color:(#\w+)"><summary>([\w ]+) - <span'\
     + r' class="route_description">(?:[\w ]+ - )?([\w ]+?)(?: Route)?<')
-# Lewis County Transit has no separate links or options
+LINK_BASE = 'https://'
+# No separate links or options
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -28,15 +29,11 @@ class DataParser(DataParserInterface):
         if not html:
             return
         for match in ROUTE_PATTERN.finditer(html):
-            if match.group(2) in self.routelistings:
-                rl = self.routelistings[match.group(2)]
-            else:
-                try:
-                    rl = RouteListing(match.group(2))
-                except AttributeError:
-                    # Raised on weekend route
-                    continue
-                self.routelistings[match.group(2)] = rl
+            try:
+                rl = self.get_add_routelisting(match.group(2))
+            except AttributeError:
+                # Raised on weekend route
+                continue
             rl.existence = 1
             # These would have to be un-capitalized if gathered from HTML
             rl.start = 'Mellen Street e-Transit Station'
@@ -44,7 +41,7 @@ class DataParser(DataParserInterface):
                 rl.start = 'Morton e-Transit Station'
             rl.dest = match.group(3)
             rl.color = match.group(1)
-            rl.links = tuple('https://' + MAIN_URL for x in range(3))
+            rl.set_links(LINK_BASE + MAIN_URL)
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

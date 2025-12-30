@@ -13,7 +13,7 @@ AGENCY = 'Pierce Transit'
 MAIN_URL = 'piercetransit.org/pierce-transit-routes/'
 ROUTE_PATTERN = re.compile(
     r'<a href="([^"]+)">(?:Route )?(Stream|\d+) ([^<]*)<\/a><\/div>')
-# Pierce Transit allows no options; navigation is all done through JavaScript
+# Allows no options; navigation is all done through JavaScript
 # Gig Harbor Trolley should be special
 SPECIAL_ROUTES = ('101',)
 
@@ -42,11 +42,7 @@ class DataParser(DataParserInterface):
                 tp_lines_dict[dirs[0].partition(' ')[0]] = dirs
 
         for match in ROUTE_PATTERN.finditer(html):
-            if match.group(2) in self.routelistings:
-                rl = self.routelistings[match.group(2)]
-            else:
-                rl = RouteListing(match.group(2))
-                self.routelistings[match.group(2)] = rl
+            rl = self.get_add_routelisting(match.group(2))
             rl.existence = 1
             try:
                 dirgen = tp_lines_dict.pop(match.group(2))
@@ -55,7 +51,7 @@ class DataParser(DataParserInterface):
             except KeyError:
                 # Something is in the PT HTML but not the trip planner data, probably 101
                 rl.start = match.group(3)
-            rl.links = tuple(match.group(1) for x in range(3))
+            rl.set_links(match.group(1))
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

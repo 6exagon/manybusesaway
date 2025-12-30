@@ -12,7 +12,7 @@ MAIN_URL = 'schedules.ridewta.com/data/wta-static-gtfs/routes.txt'
 ROUTE_PATTERN = re.compile('\n(.*?)(?:,\w*?){3}(?:([^,]+)&)?([^,]+)')
 # The schedule takes time to load, at least on some browsers
 LINK_BASE = 'https://schedules.ridewta.com/#route-details?routeNum='
-# WTA allows no options; navigation is all done through JavaScript
+# Allows no options; navigation is all done through JavaScript
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -29,11 +29,7 @@ class DataParser(DataParserInterface):
         if not html:
             return
         for match in ROUTE_PATTERN.finditer(html):
-            if match.group(1) in self.routelistings:
-                rl = self.routelistings[match.group(1)]
-            else:
-                rl = RouteListing(match.group(1))
-                self.routelistings[match.group(1)] = rl
+            rl = self.get_add_routelisting(match.group(1))
             rl.existence = 1
             if match.group(2):
                 rl.start = match.group(2)
@@ -44,7 +40,7 @@ class DataParser(DataParserInterface):
                 except ValueError:
                     # Only one terminus is the best we can do for some
                     rl.start = match.group(3)
-            rl.links = tuple(LINK_BASE + match.group(1) for x in range(3))
+            rl.set_links(LINK_BASE + match.group(1))
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

@@ -12,7 +12,8 @@ AGENCY = 'Intercity Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'www.intercitytransit.com/plan-your-trip/routes'
 ROUTE_PATTERN = re.compile(r'value="[\w\d]+">([\w\d]+) \W ([\w\d\s\/]*)<')
-# Intercity Transit allows no options; navigation is all done through JavaScript
+LINK_BASE = 'https://'
+# Allows no options; navigation is all done through JavaScript
 # This pattern should match twice, once for the top of the table each direction
 TERMS_PATTERN = re.compile(r'<tbody>\s*<tr class="timepoint".*>\s*'\
     + r'<th.*>\s*(.*?)(?:\s\[\wb\])?\s*<\/th>')
@@ -34,14 +35,10 @@ class DataParser(DataParserInterface):
         # Termini are not visible until we make this request
         timetable_requests = []
         for match in ROUTE_PATTERN.finditer(html):
-            if match.group(1) in self.routelistings:
-                rl = self.routelistings[match.group(1)]
-            else:
-                rl = RouteListing(match.group(1))
-                self.routelistings[match.group(1)] = rl
+            rl = self.get_add_routelisting(match.group(1))
             rl.existence = 1
             link = MAIN_URL + '/' + match.group(1)
-            rl.links = tuple('https://' + link for x in range(3))
+            rl.set_links(LINK_BASE + link)
             # This may or may not be used
             rl.desc = match.group(2)
             timetable_requests.append(link)

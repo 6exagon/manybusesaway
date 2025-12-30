@@ -21,7 +21,7 @@ WAVE_DASH_PATTERN = re.compile(r'The [A-Z]+')
 WAVE_DASH_SOLUTION = re.compile(r'>(\w+) circulator service')
 SECONDARY_PATTERN = re.compile(r'>(\w+)(?:<\/[a-z]+>)+\s+.*?>([^<]+?)'\
     + r'(?:(?:<\/[a-z]+>)+| Dial)[\w\W]+?(https:[^"]*)')
-# Grays Harbor Transit allows no options; dissimilar PDFs are used
+# Allows no options; dissimilar PDFs are used
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -39,18 +39,13 @@ class DataParser(DataParserInterface):
         if not main_html or not secondary_html:
             return
         for match in SECONDARY_PATTERN.finditer(secondary_html):
-            if match.group(1) in self.routelistings:
-                rl = self.routelistings[match.group(1)]
-            else:
-                rl = RouteListing(match.group(1))
-                self.routelistings[match.group(1)] = rl
+            rl = self.get_add_routelisting(match.group(1))
             rl.existence = 1
             rl.start = match.group(2)
-            rl.links = tuple(match.group(3) for x in range(3))
+            rl.set_links(match.group(3))
         for match in ROUTE_PATTERN.finditer(main_html):
-            if match.group(1) not in self.routelistings:
-                # Somehow in the more complete secondary listing but not main
-                raise ValueError
+            # If this causes a KeyError, the route is somehow in the more
+            # complete secondary listing but not the main one
             rl = self.routelistings[match.group(1)]
             # This couldn't easily be derived from the site
             rl.start = 'Aberdeen'
@@ -63,7 +58,7 @@ class DataParser(DataParserInterface):
                 rl.start = wdmatch.group(1)
             # This second link-setting is because the first will only use the
             # M-F schedule if applicable; this one uses the link to whole PDF
-            rl.links = tuple(match.group(3) for x in range(3))
+            rl.set_links(match.group(3))
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

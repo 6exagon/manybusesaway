@@ -12,7 +12,7 @@ MAIN_URL = 'pacifictransit.org/route-schedule/'
 ROUTE_PATTERN = re.compile(
     r'--route-color:(#\w+)"><summary>(\w+) - ([\w ]+)[\w \/]+?([\w ]+) - ')
 LINK_BASE = 'https://pacifictransit.org/%s-line/'
-# Pacific Transit allows no options; navigation is all done through JavaScript
+# Allows no options; navigation is all done through JavaScript
 
 class DataParser(DataParserInterface):
     def get_agency_fullname(self):
@@ -31,16 +31,12 @@ class DataParser(DataParserInterface):
         for match in ROUTE_PATTERN.finditer(html):
             # Because the HTML contains two copies of each for some reason,
             # we set properties multiple times, which is actually okay here
-            if match.group(2) in self.routelistings:
-                rl = self.routelistings[match.group(2)]
-            else:
-                rl = RouteListing(match.group(2))
-                self.routelistings[match.group(2)] = rl
+            rl = self.get_add_routelisting(match.group(2))
             rl.existence = 1
             rl.start = match.group(3)
             rl.dest = match.group(4)
             rl.color = match.group(1)
-            rl.links = tuple((LINK_BASE % rl.number) for x in range(3))
+            rl.set_links(LINK_BASE % rl.number)
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

@@ -13,7 +13,7 @@ AGENCY = 'Sound Transit'
 MAIN_URL = 'www.soundtransit.org/ride-with-us/schedules-maps'
 ROUTE_PATTERN = re.compile(r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?'\
     + r'(\d+|\w)(?: Line)?.\(([\w \/\.]+) \W (?:[^)]* ?\W )?([\w \/\.]+?) ?\)')
-LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/%s%s'
+LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/'
 LINK_OPTIONS = ('', '?direction=1', '?direction=0')
 
 class DataParser(DataParserInterface):
@@ -31,15 +31,11 @@ class DataParser(DataParserInterface):
         if not html:
             return
         for match in ROUTE_PATTERN.finditer(html):
-            if match.group(2) in self.routelistings:
-                rl = self.routelistings[match.group(2)]
-            else:
-                rl = RouteListing(match.group(2))
-                self.routelistings[match.group(2)] = rl
+            rl = self.get_add_routelisting(match.group(2))
             rl.existence = 1
             rl.start = match.group(3)
             rl.dest = match.group(4)
-            rl.set_links(LINK_BASE, match.group(1), LINK_OPTIONS)
+            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):
