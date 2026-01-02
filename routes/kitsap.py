@@ -27,9 +27,6 @@ LINK_BASE = 'https://www.kitsaptransit.com/service'
 SPECIAL_ROUTES = ('626', '635')
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'kitsap'
-
     def __init__(self, short_filename):
         if not short_filename.isnumeric():
             raise AttributeError

@@ -14,9 +14,6 @@ LINK_BASE = 'https://'
 # No separate links or options
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'lewis'
-
     def __init__(self, short_filename):
         self.number = short_filename
         self.css_class = ''

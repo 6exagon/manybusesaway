@@ -15,9 +15,6 @@ LINK_BASE = 'https://www.communitytransit.org/route/'
 LINK_OPTIONS = ('', '/table', '/0/table')
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'community'
-
     def __init__(self, short_filename):
         if not short_filename.isnumeric():
             raise AttributeError

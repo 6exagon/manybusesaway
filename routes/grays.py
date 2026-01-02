@@ -23,9 +23,6 @@ SECONDARY_PATTERN = re.compile(r'>(\w+)(?:<\/[a-z]+>)+\s+.*?>([^<]+?)'\
 # Allows no options; dissimilar PDFs are used
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'grays'
-
     def __init__(self, short_filename):
         self.number = short_filename
         self.css_class = ''

@@ -13,9 +13,6 @@ ROUTE_PATTERN = re.compile(r'<a href="([^"]+)".*?>Route (\d+)<\/a>'\
 LINK_OPTIONS = ('#page=1', '#page=2', '#page=2')
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'everett'
-
     def __init__(self, short_filename):
         self.number = short_filename
         self.css_class = ''

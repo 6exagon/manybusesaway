@@ -14,9 +14,6 @@ LINK_BASE = 'https://schedules.ridewta.com/#route-details?routeNum='
 # Allows no options; navigation is all done through JavaScript
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'whatcom'
-
     def __init__(self, short_filename):
         self.number = short_filename
         self.css_class = ''

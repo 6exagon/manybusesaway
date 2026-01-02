@@ -19,9 +19,6 @@ LINK_BASE = 'https://kingcounty.gov'
 LINK_OPTIONS = ('#route-map', '#weekday', '#weekday-b')
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'king'
-
     def __init__(self, short_filename):
         # King County Metro has many edge cases, and they're not even all here
         self.number = short_filename

@@ -17,6 +17,7 @@ from datetime import datetime
 TP_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
     {'version': '1.1', 'method': 'GetLines'}))
 TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (?:.*?\/ )*?([^\/]*?)(?: via .*)?')
+
 # This will allow all widely-supported raster image formats while disallowing
 # most other files incidentally present
 SHORT_FILENAME_PATTERN = re.compile(r'\*?([\w\d]*)\.[abefgijnpvw]+')
@@ -29,6 +30,9 @@ TABLE_HTML = '    <h3>%s</h3>\n    <table>\n%s\n    </table>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
 CSS_SPECIAL = 'x'
+# When using RouteListing object __module__ below, package name is visible
+# "routes.example" should be performantly truncated to "example"
+SUBMODULE_CUTOFF = len(__name__) + 1
 
 class RouteListingInterface(ABC):
     '''
@@ -57,21 +61,11 @@ class RouteListingInterface(ABC):
         self.datetime = 'Incomplete'
         self.img = None
 
-    @staticmethod
-    @property
-    @abstractmethod
-    def AGENCY(self):
-        '''
-        This method returns the short name of the agency implementing this
-        interface.
-        '''
-        pass
-
     def __str__(self):
         '''Returns string representation of self, for debugging or -v.'''
         return ' '.join((
             'i–'[not self.img] + '! *'[self.existence],
-            self.AGENCY,
+            self.__module__[SUBMODULE_CUTOFF:],
             self.number,
             '(' + self.css_class + ')',
             self.start,
@@ -140,10 +134,9 @@ class RouteListingInterface(ABC):
         else:
             i_td = td('')
         # Most CSS classes are agency-specific, there's only one that isn't
+        final_class = self.__module__[SUBMODULE_CUTOFF:] + '-' + self.css_class
         if self.css_class == CSS_SPECIAL:
             final_class = CSS_SPECIAL
-        else:
-            final_class = self.AGENCY + '-' + self.css_class
         displaystart = self.start.replace('&', '&amp;')
         if len(self.dest):
             displaydest = self.dest.replace('&', '&amp;')

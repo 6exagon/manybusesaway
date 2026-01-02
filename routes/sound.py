@@ -10,15 +10,13 @@ from . import DataParserInterface, RouteListingInterface
 # This Sound Transit page's formatting is terrible and inconsistent,
 # as seen by the regex, but it's seemingly the best resource there is
 MAIN_URL = 'www.soundtransit.org/ride-with-us/schedules-maps'
-ROUTE_PATTERN = re.compile(r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?'\
-    + r'(\d+|\w)(?: Line)?.\(([\w \/\.]+) \W (?:[^)]* ?\W )?([\w \/\.]+?) ?\)')
+ROUTE_PATTERN = re.compile(
+    r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?(\d+|\w)(?: Line)?'\
+    + r'.\(([\w \/\.]+) \W (?:[^)]* ?[^\w\.] )?([\w \/\.]+?) ?\)')
 LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/'
 LINK_OPTIONS = ('', '?direction=1', '?direction=0')
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'sound'
-
     def __init__(self, short_filename):
         self.number = short_filename
         if short_filename.isnumeric():

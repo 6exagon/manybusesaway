@@ -18,9 +18,6 @@ TERMS_PATTERN = re.compile(r'<tbody>\s*<tr class="timepoint".*>\s*'\
     + r'<th.*>\s*(.*?)(?:\s\[\wb\])?\s*<\/th>')
 
 class RouteListing(RouteListingInterface):
-    # This could be gotten from higher up, but this is a sanity check
-    AGENCY = 'intercity'
-
     def __init__(self, short_filename):
         self.number = short_filename
         self.css_class = ''
