@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.1.b5
+ManyBusesAway v4.1.b6
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -116,11 +116,11 @@ def main():
             for i, a in enumerate(args.agencies))
 
     # For each module, get requests it wants performed; see
-    # DataParser.get_initial_requests documentation
+    # DataParser.INITIAL_REQUESTS documentation
     # Thus, sets should all be unioned
     # They need to be put into a list, though, for the ordering
     initial_requests = list(
-        set().union(*(d.get_initial_requests() for d in data_parsers)))
+        set().union(*(d.INITIAL_REQUESTS for d in data_parsers)))
     # Perform the requests, then turn that into the resources dictionary
     initial_resources = dict(
         zip(initial_requests, request_all(initial_requests, args.verbose)))

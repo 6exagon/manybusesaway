@@ -30,145 +30,6 @@ ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
 CSS_SPECIAL = 'x'
 
-class DataParserInterface(ABC):
-    '''
-    Handles the gathering of data for each particular agency implementing it.
-    Creates and manages RouteListings.
-    '''
-    def __init__(self, agency, verbose, image_dir=None):
-        '''
-        Initializes attributes and RouteListings of self.
-        Parameter string image_dir will be the directory in which this agency's
-        image files will be found.
-        '''
-        self.agency = agency
-        # This is useful in to_html() and agency-specific requests
-        self.verbose = verbose
-        # We need this for generating HTML
-        if image_dir:
-            self.image_dir = os.path.join(image_dir, agency)
-            self.images = os.listdir(self.image_dir)
-        else:
-            self.image_dir = None
-            self.images = []
-        # Dictionary will have numbers (agency-specific) as keys, and
-        # RouteListings as values
-        self.routelistings = dict()
-        for i in self.images:
-            match = SHORT_FILENAME_PATTERN.match(i)
-            try:
-                # Get the RouteListing class (agency-specific), and instantiate
-                rl = self.get_route_listing_class()(match.group(1))
-                if i.startswith('*'):
-                    rl.existence = 2
-                rl.img = os.path.join(self.image_dir, i)
-                secs = os.stat(rl.img).st_birthtime
-                rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
-                self.routelistings[rl.number] = rl
-            # This can fail because match is None, or AttributeError is raised
-            # by rl.__init__
-            except AttributeError:
-                continue
-
-    @abstractmethod
-    def get_agency_fullname(self):
-        '''
-        This method returns the full name of the agency implementing this
-        interface, to be rendered in the final HTML.
-        '''
-        pass
-
-    @abstractmethod
-    def get_route_listing_class(self):
-        '''
-        This method returns the RouteListing class specific to the agency
-        implementing this interface. This is needed so this interface code can
-        instantiate them properly.
-        '''
-        pass
-
-    @abstractmethod
-    def get_initial_requests(self):
-        '''
-        This method returns a set whose contents are either strings (URIs
-        preceded by DNS names, i.e. website URLs) for GET requests, or tuples
-        containing a string URL and a request body for POST requests.
-        These are provided to http.client.HTTPSConnection.request,
-        though an invariant headers field is added.
-        After this first step is handled by main program (because some
-        agencies might share resources), DataParsers are free to request
-        resources on their own.
-        '''
-        pass
-
-    @abstractmethod
-    def update(self, resources):
-        '''
-        This function takes a dictionary whose keys are either strings (URIs
-        preceded by DNS names, i.e. website URLs) for GET requests, or tuples
-        containing a string URL and a request body for POST requests, and whose
-        values are what is returned by the server.
-        Internal RouteListings are updated using the contents of these.
-        DataParsers may request resources on their own in this function.
-        '''
-        pass
-
-    def get_add_routelisting(self, number):
-        '''
-        This method retrieves and returns the RouteListing value for the key
-        string number from self.routelistings if it exists. Otherwise, it
-        creates a new RouteListing specific to this agency and then returns it,
-        adding it to self.routelistings. This is a combination of a dictionary
-        get method and a defaultdict.
-        If an AttributeError is raised on the creation of a RouteListing, the
-        RouteListing will not be added to self.routelistings and the exception
-        will propagate.
-        '''
-        rl = self.routelistings.get(number)
-        if not rl:
-            rl = self.get_route_listing_class()(number)
-            self.routelistings[number] = rl
-        return rl
-
-    def sanitize_strings(self):
-        '''
-        Independently of agency-specific code, makes known string fixes to
-        RouteListings.
-        '''
-        for rl in self.routelistings.values():
-            rl.sanitize_strings()
-
-    def completed(self):
-        '''
-        Returns two integers: the number of total existing routes in
-        self.routelistings, and the number of those which are completed.
-        '''
-        total = 0
-        completed = 0
-        for rl in self.routelistings.values():
-            if rl.existence:
-                total += 1
-                if rl.img:
-                    completed += 1
-        return total, completed
-
-    def to_html(self):
-        '''
-        Returns HTML generated by this DataParser, which will be composed of
-        a header and a table made of HTML rows generated by RouteListings in
-        self.routelistings.
-        If self.verbose is True, prints messages to stdout.
-        '''
-        if self.verbose:
-            print('Sorting %s listings...' % self.agency, end='', flush=True)
-        listings = sorted(self.routelistings.values())
-        if self.verbose:
-            print('Done')
-            for l in listings:
-                print(l)
-        rows = '\n'.join(l.to_html() for l in listings)
-        return TABLE_HTML % (self.get_agency_fullname(), rows)
-
 class RouteListingInterface(ABC):
     '''
     Classes implementing this interface allows for easier management of
@@ -196,11 +57,21 @@ class RouteListingInterface(ABC):
         self.datetime = 'Incomplete'
         self.img = None
 
+    @staticmethod
+    @property
+    @abstractmethod
+    def AGENCY(self):
+        '''
+        This method returns the short name of the agency implementing this
+        interface.
+        '''
+        pass
+
     def __str__(self):
         '''Returns string representation of self, for debugging or -v.'''
         return ' '.join((
             'i–'[not self.img] + '! *'[self.existence],
-            self.agency,
+            self.AGENCY,
             self.number,
             '(' + self.css_class + ')',
             self.start,
@@ -272,7 +143,7 @@ class RouteListingInterface(ABC):
         if self.css_class == CSS_SPECIAL:
             final_class = CSS_SPECIAL
         else:
-            final_class = self.agency + '-' + self.css_class
+            final_class = self.AGENCY + '-' + self.css_class
         displaystart = self.start.replace('&', '&amp;')
         if len(self.dest):
             displaydest = self.dest.replace('&', '&amp;')
@@ -298,6 +169,155 @@ class RouteListingInterface(ABC):
         This will almost always be overridden.
         '''
         return self.number
+
+class DataParserInterface(ABC):
+    '''
+    Handles the gathering of data for each particular agency implementing it.
+    Creates and manages RouteListings.
+    Abstract static property methods outline which class constant attributes
+    must be defined within a DataParser implementing this.
+    Nesting these three decorators seems valid in modern versions of Python 3
+    in this case.
+    '''
+    def __init__(self, agency, verbose, image_dir=None):
+        '''
+        Initializes attributes and RouteListings of self.
+        Parameter string image_dir will be the directory in which this agency's
+        image files will be found.
+        '''
+        self.agency = agency
+        # This is useful in to_html() and agency-specific requests
+        self.verbose = verbose
+        # We need this for generating HTML
+        if image_dir:
+            self.image_dir = os.path.join(image_dir, agency)
+            self.images = os.listdir(self.image_dir)
+        else:
+            self.image_dir = None
+            self.images = []
+        # Dictionary will have numbers (agency-specific) as keys, and
+        # RouteListings as values
+        self.routelistings = dict()
+        for i in self.images:
+            match = SHORT_FILENAME_PATTERN.match(i)
+            try:
+                # Get the RouteListing class (agency-specific), and instantiate
+                rl = self.ROUTELISTING(match.group(1))
+                if i.startswith('*'):
+                    rl.existence = 2
+                rl.img = os.path.join(self.image_dir, i)
+                secs = os.stat(rl.img).st_birthtime
+                rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
+                self.routelistings[rl.number] = rl
+            # This can fail because match is None, or AttributeError is raised
+            # by rl.__init__
+            except AttributeError:
+                continue
+
+    @staticmethod
+    @property
+    @abstractmethod
+    def AGENCY_FULL_NAME(self):
+        '''
+        This method returns the full name of the agency implementing this
+        interface, to be rendered in the final HTML.
+        '''
+        pass
+
+    @staticmethod
+    @property
+    @abstractmethod
+    def ROUTELISTING(self):
+        '''
+        This method returns the RouteListing class specific to the agency
+        implementing this interface. This is needed so this interface code can
+        instantiate them properly.
+        '''
+        pass
+
+    @staticmethod
+    @property
+    @abstractmethod
+    def INITIAL_REQUESTS(self):
+        '''
+        This method returns a set whose contents are either strings (URIs
+        preceded by DNS names, i.e. website URLs) for GET requests, or tuples
+        containing a string URL and a request body for POST requests.
+        These are provided to http.client.HTTPSConnection.request,
+        though an invariant headers field is added.
+        After this first step is handled by main program (because some
+        agencies might share resources), DataParsers are free to request
+        resources on their own.
+        '''
+        pass
+
+    @abstractmethod
+    def update(self, resources):
+        '''
+        This function takes a dictionary whose keys are either strings (URIs
+        preceded by DNS names, i.e. website URLs) for GET requests, or tuples
+        containing a string URL and a request body for POST requests, and whose
+        values are what is returned by the server.
+        Internal RouteListings are updated using the contents of these.
+        DataParsers may request resources on their own in this function.
+        '''
+        pass
+
+    def get_add_routelisting(self, number):
+        '''
+        This method retrieves and returns the RouteListing value for the key
+        string number from self.routelistings if it exists. Otherwise, it
+        creates a new RouteListing specific to this agency and then returns it,
+        adding it to self.routelistings. This is a combination of a dictionary
+        get method and a defaultdict.
+        If an AttributeError is raised on the creation of a RouteListing, the
+        RouteListing will not be added to self.routelistings and the exception
+        will propagate.
+        '''
+        rl = self.routelistings.get(number)
+        if not rl:
+            rl = self.ROUTELISTING(number)
+            self.routelistings[number] = rl
+        return rl
+
+    def sanitize_strings(self):
+        '''
+        Independently of agency-specific code, makes known string fixes to
+        RouteListings.
+        '''
+        for rl in self.routelistings.values():
+            rl.sanitize_strings()
+
+    def completed(self):
+        '''
+        Returns two integers: the number of total existing routes in
+        self.routelistings, and the number of those which are completed.
+        '''
+        total = 0
+        completed = 0
+        for rl in self.routelistings.values():
+            if rl.existence:
+                total += 1
+                if rl.img:
+                    completed += 1
+        return total, completed
+
+    def to_html(self):
+        '''
+        Returns HTML generated by this DataParser, which will be composed of
+        a header and a table made of HTML rows generated by RouteListings in
+        self.routelistings.
+        If self.verbose is True, prints messages to stdout.
+        '''
+        if self.verbose:
+            print('Sorting %s listings...' % self.agency, end='', flush=True)
+        listings = sorted(self.routelistings.values())
+        if self.verbose:
+            print('Done')
+            for l in listings:
+                print(l)
+        rows = '\n'.join(l.to_html() for l in listings)
+        return TABLE_HTML % (self.AGENCY_FULL_NAME, rows)
 
 def td(data, css_class=None, **kwargs):
     '''

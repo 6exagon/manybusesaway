@@ -7,7 +7,6 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
-AGENCY = 'Sound Transit'
 # This Sound Transit page's formatting is terrible and inconsistent,
 # as seen by the regex, but it's seemingly the best resource there is
 MAIN_URL = 'www.soundtransit.org/ride-with-us/schedules-maps'
@@ -16,31 +15,11 @@ ROUTE_PATTERN = re.compile(r'<a href="[^"]*?([^"\/]+)"[^>]*>(?:Link |Sounder )?'
 LINK_BASE = 'https://www.soundtransit.org/ride-with-us/routes-schedules/'
 LINK_OPTIONS = ('', '?direction=1', '?direction=0')
 
-class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL}
-
-    def update(self, resources):
-        html = resources[MAIN_URL]
-        if not html:
-            return
-        for match in ROUTE_PATTERN.finditer(html):
-            rl = self.get_add_routelisting(match.group(2))
-            rl.existence = 1
-            rl.start = match.group(3)
-            rl.dest = match.group(4)
-            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
-
 class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'sound'
+
     def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'sound'
         self.number = short_filename
         if short_filename.isnumeric():
             self.css_class = str(int(self.number) // 100)
@@ -54,3 +33,19 @@ class RouteListing(RouteListingInterface):
             return self.number
         return '<span class="circle" id="sound-c%s">%s</span>' % (
             self.number, self.number)
+
+class DataParser(DataParserInterface):
+    AGENCY_FULL_NAME = 'Sound Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL}
+
+    def update(self, resources):
+        html = resources[MAIN_URL]
+        if not html:
+            return
+        for match in ROUTE_PATTERN.finditer(html):
+            rl = self.get_add_routelisting(match.group(2))
+            rl.existence = 1
+            rl.start = match.group(3)
+            rl.dest = match.group(4)
+            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)

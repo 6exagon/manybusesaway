@@ -7,7 +7,6 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
-AGENCY = 'Community Transit'
 MAIN_URL = 'www.communitytransit.org/maps-and-schedules/'\
     + 'maps-and-schedules-by-route'
 ROUTE_PATTERN = re.compile(
@@ -15,35 +14,11 @@ ROUTE_PATTERN = re.compile(
 LINK_BASE = 'https://www.communitytransit.org/route/'
 LINK_OPTIONS = ('', '/table', '/0/table')
 
-class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL}
-
-    def update(self, resources):
-        html = resources[MAIN_URL]
-        if not html:
-            return
-        for match in ROUTE_PATTERN.finditer(html):
-            try:
-                rl = self.get_add_routelisting(match.group(1))
-            except AttributeError:
-                # Raised on SoundTransit duplicate
-                continue
-            rl.existence = 1
-            rl.start = match.group(2)
-            rl.dest = match.group(3)
-            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
-
 class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'community'
+
     def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'community'
         if not short_filename.isnumeric():
             raise AttributeError
         self.number = short_filename
@@ -60,3 +35,23 @@ class RouteListing(RouteListingInterface):
         if self.css_class == '7':
             return '<p class="community-swift">Swift</p>' + self.number
         return self.number
+
+class DataParser(DataParserInterface):
+    AGENCY_FULL_NAME = 'Community Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL}
+
+    def update(self, resources):
+        html = resources[MAIN_URL]
+        if not html:
+            return
+        for match in ROUTE_PATTERN.finditer(html):
+            try:
+                rl = self.get_add_routelisting(match.group(1))
+            except AttributeError:
+                # Raised on SoundTransit duplicate
+                continue
+            rl.existence = 1
+            rl.start = match.group(2)
+            rl.dest = match.group(3)
+            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)

@@ -15,7 +15,6 @@ from sys import stderr
 
 from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
-AGENCY = 'Kitsap Transit'
 # This isn't even everything we need
 # This first resource is very out of date, but we won't rely on it much
 MAIN_URL = 'kttracker.com/assets/ta/kitsaptransit/config.json'
@@ -27,15 +26,28 @@ LINK_BASE = 'https://www.kitsaptransit.com/service'
 # Early South and Early North should be special
 SPECIAL_ROUTES = ('626', '635')
 
+class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'kitsap'
+
+    def __init__(self, short_filename):
+        if not short_filename.isnumeric():
+            raise AttributeError
+        self.number = short_filename
+        series = int(self.number) // 100
+        if series == 1:
+            series = 0
+        elif series == 5:
+            series = 4
+        self.css_class = str(series)
+        if self.number in SPECIAL_ROUTES:
+            self.css_class = CSS_SPECIAL
+        super().__init__()
+
 class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL, WORKER_DRIVER_URL}
+    AGENCY_FULL_NAME = 'Kitsap Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL, WORKER_DRIVER_URL}
 
     def update(self, resources):
         json = resources[MAIN_URL]
@@ -103,23 +115,6 @@ class DataParser(DataParserInterface):
                 rl.start = wd_html.partition(value + '">')[2].partition('<')[0]
                 rl.start.rstrip()
             rl.set_links(LINK_BASE + value)
-
-class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'kitsap'
-        if not short_filename.isnumeric():
-            raise AttributeError
-        self.number = short_filename
-        series = int(self.number) // 100
-        if series == 1:
-            series = 0
-        elif series == 5:
-            series = 4
-        self.css_class = str(series)
-        if self.number in SPECIAL_ROUTES:
-            self.css_class = CSS_SPECIAL
-        super().__init__()
 
 # The following is all to fetch the kttracker listings
 # Deliberately opaque

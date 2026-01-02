@@ -8,7 +8,6 @@ import re
 
 from . import DataParserInterface, RouteListingInterface, TP_REQ, TP_PATTERN, CSS_SPECIAL
 
-AGENCY = 'Pierce Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'piercetransit.org/pierce-transit-routes/'
 ROUTE_PATTERN = re.compile(
@@ -17,15 +16,26 @@ ROUTE_PATTERN = re.compile(
 # Gig Harbor Trolley should be special
 SPECIAL_ROUTES = ('101',)
 
+class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'pierce'
+
+    def __init__(self, short_filename):
+        self.number = short_filename
+        self.css_class = ''
+        if self.number in SPECIAL_ROUTES:
+            self.css_class = CSS_SPECIAL
+        super().__init__()
+
+    def displaynum(self):
+        if self.number.isnumeric():
+            return self.number
+        return '<p class="smallnum">Stream</p>'
+
 class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL, TP_REQ}
+    AGENCY_FULL_NAME = 'Pierce Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL, TP_REQ}
 
     def update(self, resources):
         html = resources[MAIN_URL]
@@ -52,18 +62,3 @@ class DataParser(DataParserInterface):
                 # Something is in the PT HTML but not the trip planner data, probably 101
                 rl.start = match.group(3)
             rl.set_links(match.group(1))
-
-class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'pierce'
-        self.number = short_filename
-        self.css_class = ''
-        if self.number in SPECIAL_ROUTES:
-            self.css_class = CSS_SPECIAL
-        super().__init__()
-
-    def displaynum(self):
-        if self.number.isnumeric():
-            return self.number
-        return '<p class="smallnum">Stream</p>'

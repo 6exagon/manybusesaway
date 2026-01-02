@@ -7,22 +7,38 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
-AGENCY = 'Lewis County Transit'
 MAIN_URL = 'lewiscountytransit.org/bus-routes/'
 ROUTE_PATTERN = re.compile(r'--route-color:(#\w+)"><summary>([\w ]+) - <span'\
     + r' class="route_description">(?:[\w ]+ - )?([\w ]+?)(?: Route)?<')
 LINK_BASE = 'https://'
 # No separate links or options
 
+class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'lewis'
+
+    def __init__(self, short_filename):
+        self.number = short_filename
+        self.css_class = ''
+        self.color = 'white'
+        if 'Weekend' in self.number:
+            # Not a separate route
+            raise AttributeError
+        super().__init__()
+
+    def position(self):
+        # Lexicographic ordering is used on website, which is desirable here
+        return self.number
+
+    def displaynum(self):
+        # Inline style is probably the best here
+        return '<p class="smallnum" style="color:%s">%s</p>' % (
+            self.color, self.number)
+
 class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL}
+    AGENCY_FULL_NAME = 'Lewis County Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL}
 
     def update(self, resources):
         html = resources[MAIN_URL]
@@ -42,24 +58,3 @@ class DataParser(DataParserInterface):
             rl.dest = match.group(3)
             rl.color = match.group(1)
             rl.set_links(LINK_BASE + MAIN_URL)
-
-class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'lewis'
-        self.number = short_filename
-        self.css_class = ''
-        self.color = 'white'
-        if 'Weekend' in self.number:
-            # Not a separate route
-            raise AttributeError
-        super().__init__()
-
-    def position(self):
-        # Lexicographic ordering is used on website, which is desirable here
-        return self.number
-
-    def displaynum(self):
-        # Inline style is probably the best here
-        return '<p class="smallnum" style="color:%s">%s</p>' % (
-            self.color, self.number)

@@ -7,7 +7,6 @@ import re
 
 from . import DataParserInterface, RouteListingInterface
 
-AGENCY = 'Grays Harbor Transit'
 MAIN_URL = 'www.ghtransit.com/routes'
 # Used for 20P and HarborFLEX routes not listed on main page
 # But, on its own, it's not a great resource for start and dest
@@ -23,15 +22,21 @@ SECONDARY_PATTERN = re.compile(r'>(\w+)(?:<\/[a-z]+>)+\s+.*?>([^<]+?)'\
     + r'(?:(?:<\/[a-z]+>)+| Dial)[\w\W]+?(https:[^"]*)')
 # Allows no options; dissimilar PDFs are used
 
+class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'grays'
+
+    def __init__(self, short_filename):
+        self.number = short_filename
+        self.css_class = ''
+        if self.number.isnumeric() and len(self.number) == 3:
+            self.css_class = 'harborflex'
+        super().__init__()
+
 class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL, SECONDARY_URL}
+    AGENCY_FULL_NAME = 'Grays Harbor Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL, SECONDARY_URL}
 
     def update(self, resources):
         main_html = resources[MAIN_URL]
@@ -59,13 +64,3 @@ class DataParser(DataParserInterface):
             # This second link-setting is because the first will only use the
             # M-F schedule if applicable; this one uses the link to whole PDF
             rl.set_links(match.group(3))
-
-class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'grays'
-        self.number = short_filename
-        self.css_class = ''
-        if self.number.isnumeric() and len(self.number) == 3:
-            self.css_class = 'harborflex'
-        super().__init__()

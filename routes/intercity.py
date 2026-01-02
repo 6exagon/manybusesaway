@@ -8,7 +8,6 @@ import re
 from . import DataParserInterface, RouteListingInterface
 from requests import request_all
 
-AGENCY = 'Intercity Transit'
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'www.intercitytransit.com/plan-your-trip/routes'
 ROUTE_PATTERN = re.compile(r'value="[\w\d]+">([\w\d]+) \W ([\w\d\s\/]*)<')
@@ -18,40 +17,11 @@ LINK_BASE = 'https://'
 TERMS_PATTERN = re.compile(r'<tbody>\s*<tr class="timepoint".*>\s*'\
     + r'<th.*>\s*(.*?)(?:\s\[\wb\])?\s*<\/th>')
 
-class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL}
-
-    def update(self, resources):
-        html = resources[MAIN_URL]
-        if not html:
-            return
-        # Termini are not visible until we make this request
-        timetable_requests = []
-        for match in ROUTE_PATTERN.finditer(html):
-            rl = self.get_add_routelisting(match.group(1))
-            rl.existence = 1
-            link = MAIN_URL + '/' + match.group(1)
-            rl.set_links(LINK_BASE + link)
-            # This may or may not be used
-            rl.desc = match.group(2)
-            timetable_requests.append(link)
-        timetable_resources = request_all(timetable_requests, self.verbose)
-        for i, res in enumerate(timetable_resources):
-            # timetable_requests are in the same order as resources
-            rl = self.routelistings[timetable_requests[i].split('/')[-1]]
-            rl.parse_termini(res)
-
 class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'intercity'
+
     def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'intercity'
         self.number = short_filename
         self.css_class = ''
         super().__init__()
@@ -77,3 +47,28 @@ class RouteListing(RouteListingInterface):
         if self.number == 'ONE':
             return '<div class="intercity-green"><p id="intercity-one">1</p>one</div>'
         return self.number
+
+class DataParser(DataParserInterface):
+    AGENCY_FULL_NAME = 'Intercity Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL}
+
+    def update(self, resources):
+        html = resources[MAIN_URL]
+        if not html:
+            return
+        # Termini are not visible until we make this request
+        timetable_requests = []
+        for match in ROUTE_PATTERN.finditer(html):
+            rl = self.get_add_routelisting(match.group(1))
+            rl.existence = 1
+            link = MAIN_URL + '/' + match.group(1)
+            rl.set_links(LINK_BASE + link)
+            # This may or may not be used
+            rl.desc = match.group(2)
+            timetable_requests.append(link)
+        timetable_resources = request_all(timetable_requests, self.verbose)
+        for i, res in enumerate(timetable_resources):
+            # timetable_requests are in the same order as resources
+            rl = self.routelistings[timetable_requests[i].split('/')[-1]]
+            rl.parse_termini(res)

@@ -24,15 +24,19 @@ LINK_OPTIONS = (
 TERMS_PATTERN = re.compile(r'<h1>Route (\d+X?).*?</h1>\s*<h2>(?:Route \d+X? )?'\
     + r'([\w&\s]+?)(?:\s?\/[\/\w&\s]*?\s?([\w&\s]+?))?(?:<|\svia)')
 
+class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'skagit'
+
+    def __init__(self, short_filename):
+        self.number = short_filename
+        self.css_class = ''
+        super().__init__()
+
 class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL}
+    AGENCY_FULL_NAME = 'Skagit Transit'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL}
 
     def update(self, resources):
         # This function is very convoluted, but basically, if a route's termini
@@ -67,11 +71,3 @@ class DataParser(DataParserInterface):
             rl.start = match.group(2)
             if match.group(3):
                 rl.dest = match.group(3)
-
-class RouteListing(RouteListingInterface):
-    def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'skagit'
-        self.number = short_filename
-        self.css_class = ''
-        super().__init__()

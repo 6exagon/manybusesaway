@@ -7,7 +7,6 @@ import re
 
 from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
-AGENCY = 'King County Metro'
 MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
     + 'fe-apps/schedule/08302025/js/find-a-schedule-js.js'
 TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
@@ -19,40 +18,11 @@ LINK_BASE = 'https://kingcounty.gov'
 # listing order, unfortunately
 LINK_OPTIONS = ('#route-map', '#weekday', '#weekday-b')
 
-class DataParser(DataParserInterface):
-    def get_agency_fullname(self):
-        return AGENCY
-
-    def get_route_listing_class(self):
-        return RouteListing
-
-    def get_initial_requests(self):
-        return {MAIN_URL, TROLLEY_URL}
-
-    def update(self, resources):
-        main_js = resources[MAIN_URL]
-        if not main_js:
-            return
-        trolley_html = resources[TROLLEY_URL]
-        if not trolley_html:
-            # Not a disaster, we can just render without visible trolley colors
-            trolley_html = ''
-        for match in ROUTE_PATTERN.finditer(main_js):
-            if match.group(2):
-                number = match.group(2).rstrip() + match.group(3)
-            else:
-                number = match.group(3)
-            rl = self.get_add_routelisting(number)
-            rl.existence = 1
-            rl.parse_termini(match.group(4))
-            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
-            if 'Route ' + rl.number in trolley_html:
-                rl.css_class = 'trolley'
-
 class RouteListing(RouteListingInterface):
+    # This could be gotten from higher up, but this is a sanity check
+    AGENCY = 'king'
+
     def __init__(self, short_filename):
-        # This could be gotten from higher up, but this is a sanity check
-        self.agency = 'king'
         # King County Metro has many edge cases, and they're not even all here
         self.number = short_filename
         if short_filename.isnumeric():
@@ -99,3 +69,28 @@ class RouteListing(RouteListingInterface):
         if self.number.startswith('DART'):
             return '<p class="king-dart">DART</p>' + self.number.lstrip('DART')
         return self.number
+
+class DataParser(DataParserInterface):
+    AGENCY_FULL_NAME = 'King County Metro'
+    ROUTELISTING = RouteListing
+    INITIAL_REQUESTS = {MAIN_URL, TROLLEY_URL}
+
+    def update(self, resources):
+        main_js = resources[MAIN_URL]
+        if not main_js:
+            return
+        trolley_html = resources[TROLLEY_URL]
+        if not trolley_html:
+            # Not a disaster, we can just render without visible trolley colors
+            trolley_html = ''
+        for match in ROUTE_PATTERN.finditer(main_js):
+            if match.group(2):
+                number = match.group(2).rstrip() + match.group(3)
+            else:
+                number = match.group(3)
+            rl = self.get_add_routelisting(number)
+            rl.existence = 1
+            rl.parse_termini(match.group(4))
+            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
+            if 'Route ' + rl.number in trolley_html:
+                rl.css_class = 'trolley'
