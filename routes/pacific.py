@@ -8,8 +8,8 @@ import re
 from . import DataParserInterface, RouteListingInterface
 
 MAIN_URL = 'pacifictransit.org/route-schedule/'
-ROUTE_PATTERN = re.compile(
-    r'--route-color:(#\w+)"><summary>(\w+) - ([\w ]+)[\w \/]+?([\w ]+) - ')
+ROUTE_PATTERN = re.compile(r'--route-color:(#\w+)"><summary>(\w+) Weekday ?- '\
+    + r'(?:"[\w ]*" - )?([\w ]+)[\w \/]*?([\w ]+)? - ')
 LINK_BASE = 'https://pacifictransit.org/%s-line/'
 # Allows no options; navigation is all done through JavaScript
 
@@ -42,8 +42,8 @@ class DataParser(DataParserInterface):
             # Because the HTML contains two copies of each for some reason,
             # we set properties multiple times, which is actually okay here
             rl = self.get_add_routelisting(match.group(2))
-            rl.existence = 1
+            rl.isdelisted = False
             rl.start = match.group(3)
-            rl.dest = match.group(4)
+            rl.dest = match.group(4) or ''
             rl.color = match.group(1)
             rl.set_links(LINK_BASE % rl.number)

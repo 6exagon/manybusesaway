@@ -42,7 +42,7 @@ class DataParser(DataParserInterface):
             return
         for match in SECONDARY_PATTERN.finditer(secondary_html):
             rl = self.get_add_routelisting(match.group(1))
-            rl.existence = 1
+            rl.isdelisted = False
             rl.start = match.group(2)
             rl.set_links(match.group(3))
         for match in ROUTE_PATTERN.finditer(main_html):

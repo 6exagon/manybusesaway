@@ -47,7 +47,7 @@ class DataParser(DataParserInterface):
             except AttributeError:
                 # Raised on weekend route
                 continue
-            rl.existence = 1
+            rl.isdelisted = False
             # These would have to be un-capitalized if gathered from HTML
             rl.start = 'Mellen Street e-Transit Station'
             if rl.number == 'Brown East':

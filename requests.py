@@ -3,13 +3,15 @@ Handles fetching resources from different sources concurrently by HTTPS.
 '''
 
 import http.client
+from ssl import SSLCertVerificationError
 from concurrent.futures import ThreadPoolExecutor
 from itertools import repeat
 from sys import stderr
 
 HEADERS = {'User-Agent': 'ManyBusesAway', 'Content-Type': 'application/json'}
 # For verbose printing, or in case of failure
-V_MSG = 'HTTPS request for %s%s got response %s'
+V_MSG = 'Request for %s%s got response %s'
+HTTP_MSG = 'HTTPS failed for %s, switching to HTTP'
 
 def request_all(request_list, verbose=False):
     '''
@@ -47,14 +49,21 @@ def request_one(url, verbose=False):
         url, body = url
     dns_name, slash, p = url.partition('/')
     connection = http.client.HTTPSConnection(dns_name)
-    returnval = send(connection, slash + p, body, verbose)
+    try:
+        returnval = send(connection, slash + p, body, verbose)
+    except SSLCertVerificationError:
+        # Fall back on HTTP, which is required for the King County Metro trolley URL
+        if verbose:
+            print(HTTP_MSG % url)
+        connection = http.client.HTTPConnection(dns_name)
+        returnval = send(connection, slash + p, body, verbose)
     connection.close()
     return returnval
 
 def send(conn, page, body=None, verbose=False):
     '''
     Sends single request for string page (with optional body) over
-    http.client.HTTPSConnection conn.
+    http.client.HTTPSConnection or http.client.HTTPConnection conn.
     If response code is not 200, prints message to stderr and returns None,
     unless it is 3xx, in which case the indicated location is requested by
     calling this function recursively.

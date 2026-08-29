@@ -50,7 +50,7 @@ class DataParser(DataParserInterface):
 
         for match in ROUTE_PATTERN.finditer(html):
             rl = self.get_add_routelisting(match.group(2))
-            rl.existence = 1
+            rl.isdelisted = False
             try:
                 dirgen = tp_lines_dict.pop(match.group(2))
                 rl.start, rl.dest = (

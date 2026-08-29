@@ -8,9 +8,9 @@ import re
 from . import DataParserInterface, RouteListingInterface
 
 MAIN_URL = 'everetttransit.org/101/Schedules'
-ROUTE_PATTERN = re.compile(r'<a href="([^"]+)".*?>Route (\d+)<\/a>'\
-    + r'(?:(?:<span.*?<\/span>)|(?:: ))([\w\s&;]*) &mdash; ([\w\s&;]*)<\/li>')
-LINK_OPTIONS = ('#page=1', '#page=2', '#page=2')
+ROUTE_PATTERN = re.compile(r'<a href="([^"]+)".*?>Route (\d+)<\/a><\/h2><p.*?>'\
+    + r'<strong.*?>([\w\s&;]*) &mdash; ([\w\s&;]*)')
+# Allows no options; we let the user click the PDF link on their own
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):
@@ -29,7 +29,7 @@ class DataParser(DataParserInterface):
             return
         for match in ROUTE_PATTERN.finditer(html):
             rl = self.get_add_routelisting(match.group(2))
-            rl.existence = 1
+            rl.isdelisted = False
             rl.start = match.group(3)
             rl.dest = match.group(4)
-            rl.set_links(match.group(1), LINK_OPTIONS)
+            rl.set_links(match.group(1))

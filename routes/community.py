@@ -23,8 +23,6 @@ class RouteListing(RouteListingInterface):
         if series == 5:
             # Some routes shown by ST and CT both, but belong to ST
             raise AttributeError
-        elif series == 4:
-            series = 9
         self.css_class = str(series)
         super().__init__()
 
@@ -48,7 +46,7 @@ class DataParser(DataParserInterface):
             except AttributeError:
                 # Raised on SoundTransit duplicate
                 continue
-            rl.existence = 1
+            rl.isdelisted = False
             rl.start = match.group(2)
             rl.dest = match.group(3)
             rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)

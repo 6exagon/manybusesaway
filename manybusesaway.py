@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.1.0
+ManyBusesAway v4.2.b0
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -19,7 +19,8 @@ from requests import request_all
 
 DEFAULT_AGENCIES_ORDER = (
     'king', 'sound', 'everett', 'community', 'pierce', 'intercity', 'kitsap',
-    'skagit', 'whatcom', 'lewis', 'pacific', 'grays', 'central')
+    'skagit', 'whatcom', 'lewis', 'pacific', 'central')
+# TODO: grays before/after central
 
 FINAL_HTML = '''
 <!DOCTYPE html>
@@ -40,8 +41,6 @@ FINAL_HTML = '''
 </html>'''
 
 NOTES = '''
-Routes with <span class="discontinued">Discontinued</span> tag have been
- discontinued since their completion.<br>
 Routes with <span class="delisted">Delisted</span> tag remain operational
  but are absent from public transit agency websites (possibly intentionally).<br>
 See project homepage for details:'''

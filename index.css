@@ -139,14 +139,6 @@ img:hover {
     margin: -5px;
     margin-right: 4px;
 }
-#intercity-one {
-    text-align: center;
-    font-size: 30px;
-    font-family: Courier New, sans-serif;
-    margin-bottom: -12px;
-    margin-top: 10px;
-}
-.intercity-green {color: #80e54a;}
 
 .circle {
     display: block;
@@ -165,7 +157,6 @@ img:hover {
     margin: -5px;
     text-align: center;
 }
-.discontinued {color: #8a1919; padding: 0px;}
 .delisted {color: #f70000; padding: 0px;}
 .complete {background-color: #b4ffc0; font-family: "Arial", sans-serif;}
 .incomplete {background-color: #d5d5d5; color: #707070; font-size: 10px;}

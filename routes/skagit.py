@@ -46,7 +46,7 @@ class DataParser(DataParserInterface):
         timetable_requests = []
         for match in ROUTE_PATTERN.finditer(html):
             rl = self.get_add_routelisting(match.group(2))
-            rl.existence = 1
+            rl.isdelisted = False
             rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
             if match.group(4):
                 rl.start = match.group(3)

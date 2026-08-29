@@ -35,7 +35,7 @@ class DataParser(DataParserInterface):
             return
         for match in ROUTE_PATTERN.finditer(html):
             rl = self.get_add_routelisting(match.group(1))
-            rl.existence = 1
+            rl.isdelisted = False
             if match.group(2):
                 rl.start = match.group(2)
                 rl.dest = match.group(3)

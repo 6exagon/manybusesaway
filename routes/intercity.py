@@ -10,12 +10,14 @@ from requests import request_all
 
 # Used only for the schedule links, inadequate for route descriptions
 MAIN_URL = 'www.intercitytransit.com/plan-your-trip/routes'
-ROUTE_PATTERN = re.compile(r'value="[\w\d]+">([\w\d]+) \W ([\w\d\s\/]*)<')
+ROUTE_PATTERN = re.compile(
+    r'id":"([^"]+)","route_long_name":"[^"]+","route_short_name":"([^"]+)"')
 LINK_BASE = 'https://'
 # Allows no options; navigation is all done through JavaScript
-# This pattern should match twice, once for the top of the table each direction
-TERMS_PATTERN = re.compile(r'<tbody>\s*<tr class="timepoint".*>\s*'\
-    + r'<th.*>\s*(.*?)(?:\s\[\wb\])?\s*<\/th>')
+TABLE_NUM = re.compile(r'"route_short_name":"([^"]+)"}')
+TABLE_URL = 'www.intercitytransit.com/pics-fetch/api/route_schedule?route_id='
+TABLE_PATTERN = re.compile(
+    r'"Directions":{"0":"([^"]+?)(?: via [^"]+)?","1":"([^"]+?)(?: via [^"]+)?"')
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):
@@ -28,22 +30,11 @@ class RouteListing(RouteListingInterface):
         Intercity Transit routes each require a separate webpage to be loaded
         and parsed.
         '''
-        try:
-            self.dest, self.start = (
-                match.group(1) for match in TERMS_PATTERN.finditer(resource))
-            if self.start == 'Olympia Transit Center' and '/' not in self.desc:
-                self.dest = self.desc
-            if self.number in ('600', '610'):
-                # Both methods of assigning these are unsatisfactory
-                self.dest = 'SR 512 P&R'
-        except ValueError:
-            # It's alright if this assignment is impossible
-            pass
-
-    def displaynum(self):
-        if self.number == 'ONE':
-            return '<div class="intercity-green"><p id="intercity-one">1</p>one</div>'
-        return self.number
+        match = TABLE_PATTERN.search(resource)
+        if match:
+            self.start = match.group(1)
+            self.dest = match.group(2)
+        # If unable to match, just give up
 
 class DataParser(DataParserInterface):
     AGENCY_FULL_NAME = 'Intercity Transit'
@@ -57,15 +48,18 @@ class DataParser(DataParserInterface):
         # Termini are not visible until we make this request
         timetable_requests = []
         for match in ROUTE_PATTERN.finditer(html):
-            rl = self.get_add_routelisting(match.group(1))
-            rl.existence = 1
-            link = MAIN_URL + '/' + match.group(1)
+            # Deal with nightline
+            if match.group(2) != 'NL':
+                rl = self.get_add_routelisting(match.group(2))
+            else:
+                rl = self.get_add_routelisting('41')
+            rl.isdelisted = False
+            link = MAIN_URL + '/' + match.group(2)
             rl.set_links(LINK_BASE + link)
-            # This may or may not be used
-            rl.desc = match.group(2)
-            timetable_requests.append(link)
+            timetable_requests.append(TABLE_URL + match.group(1))
         timetable_resources = request_all(timetable_requests, self.verbose)
         for i, res in enumerate(timetable_resources):
             # timetable_requests are in the same order as resources
-            rl = self.routelistings[timetable_requests[i].split('/')[-1]]
+            match = TABLE_NUM.search(res)
+            rl = self.routelistings[match.group(1)]
             rl.parse_termini(res)

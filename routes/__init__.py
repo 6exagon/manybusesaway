@@ -18,14 +18,13 @@ TP_REQ = ('tripplanner.kingcounty.gov/TI_FixedRoute_Line', dumps(
     {'version': '1.1', 'method': 'GetLines'}))
 TP_PATTERN = re.compile(r'.*(?:[Tt]o|-) (?:.*?\/ )*?([^\/]*?)(?: via .*)?')
 
+# Note that discontinued routes are no longer included
 # This will allow all widely-supported raster image formats while disallowing
 # most other files incidentally present
-SHORT_FILENAME_PATTERN = re.compile(r'\*?([\w\d]*)\.[abefgijnpvw]+')
+SHORT_FILENAME_PATTERN = re.compile(r'([\w\d]*)\.[abefgijnpvw]+')
 TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # This is for RouteListings to export their own HTML, in to_html()
-# More notes may be needed in the future
-EXISTENCE_NOTES = (
-    ('Discontinued', 'discontinued'), ('',), ('Delisted', 'delisted'))
+DELISTED_NOTES = ('Delisted', 'delisted')
 TABLE_HTML = '    <h3>%s</h3>\n    <table>\n%s\n    </table>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
@@ -54,22 +53,20 @@ class RouteListingInterface(ABC):
         self.start = ''
         self.dest = ''
         self.links = (None, None, None)
-        # Python doesn't have C-style enums, so 0 = discontinued, 1 = normal,
-        # 2 = delisted
-        if not hasattr(self, 'existence'):
-            self.existence = 0
+        if not hasattr(self, 'isdelisted'):
+            self.isdelisted = True
         self.datetime = 'Incomplete'
         self.img = None
 
     def __str__(self):
         '''Returns string representation of self, for debugging or -v.'''
         return ' '.join((
-            'i–'[not self.img] + '! *'[self.existence],
+            'i–'[not self.img] + ' *'[self.isdelisted],
             self.__module__[SUBMODULE_CUTOFF:],
             self.number,
             '(' + self.css_class + ')',
             self.start,
-            '⬌',
+            '<-->',
             self.dest))
 
     def __lt__(self, other):
@@ -151,7 +148,7 @@ class RouteListingInterface(ABC):
             td(self.displaynum(), 'b-' + final_class, link=self.links[0]),
             start_td,
             dest_td,
-            td(*EXISTENCE_NOTES[self.existence]),
+            td(*(DELISTED_NOTES if self.isdelisted else ('',))),
             td(self.datetime, 'complete' if self.img else 'incomplete'),
             i_td)
 
@@ -159,7 +156,7 @@ class RouteListingInterface(ABC):
         '''
         Returns this RouteListing's HTML number, which could be the simple
         number in plaintext or contain more complicated HTML.
-        This will almost always be overridden.
+        This will often be overridden.
         '''
         return self.number
 
@@ -196,8 +193,6 @@ class DataParserInterface(ABC):
             try:
                 # Get the RouteListing class (agency-specific), and instantiate
                 rl = self.ROUTELISTING(match.group(1))
-                if i.startswith('*'):
-                    rl.existence = 2
                 rl.img = os.path.join(self.image_dir, i)
                 secs = os.stat(rl.img).st_birthtime
                 rl.datetime = datetime.fromtimestamp(secs).strftime(TIME_FORMAT)
@@ -286,14 +281,8 @@ class DataParserInterface(ABC):
         Returns two integers: the number of total existing routes in
         self.routelistings, and the number of those which are completed.
         '''
-        total = 0
-        completed = 0
-        for rl in self.routelistings.values():
-            if rl.existence:
-                total += 1
-                if rl.img:
-                    completed += 1
-        return total, completed
+        completed = sum(1 for rl in self.routelistings.values() if rl.img)
+        return len(self.routelistings), completed
 
     def to_html(self):
         '''

@@ -66,7 +66,7 @@ class DataParser(DataParserInterface):
             except AttributeError:
                 # Raised on the anomalous misprint TA027 Task on the tracker
                 continue
-            rl.existence = 1
+            rl.isdelisted = False
             rl.start = map['rtnm']
             if num.startswith('6'):
                 rl.start = ' '.join(rl.start.split()[:-1])
@@ -108,7 +108,7 @@ class DataParser(DataParserInterface):
                 self.routelistings[key] = rl
                 # Get its description from the Worker/Driver HTML,
                 # all we needed here was the number
-                rl.existence = 1
+                rl.isdelisted = False
                 rl.start = wd_html.partition(value + '">')[2].partition('<')[0]
                 rl.start.rstrip()
             rl.set_links(LINK_BASE + value)
@@ -131,7 +131,7 @@ HEADERS = {
 U_0 = '/bustime'
 U_1 = '/api/v3/gettime?requestType=gettime&unixTime=true&key=%s&format=json&xtime=%d'
 U_2 = '/api/v3/getroutes?requestType=getroutes&locale=en&key=%s&format=json&xtime=%d'
-V_MSG = 'HTTPS requests for kttracker.com got response %s'
+V_MSG = 'Requests for kttracker.com got response %s'
 
 def kitsap_request(verbose=False):
     '''

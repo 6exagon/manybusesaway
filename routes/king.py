@@ -35,7 +35,7 @@ class RouteListing(RouteListingInterface):
         elif self.number.startswith('X'):
             self.number = short_filename[1:]
             self.css_class = 'nonbus'
-            self.existence = 1
+            self.isdelisted = False
         else:
             self.css_class = 'rapidride'
         super().__init__()
@@ -86,7 +86,7 @@ class DataParser(DataParserInterface):
             else:
                 number = match.group(3)
             rl = self.get_add_routelisting(number)
-            rl.existence = 1
+            rl.isdelisted = False
             rl.parse_termini(match.group(4))
             rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
             if 'Route ' + rl.number in trolley_html:

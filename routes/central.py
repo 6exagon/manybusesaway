@@ -30,7 +30,7 @@ class DataParser(DataParserInterface):
         json_list = loads(json)
         for i in json_list:
             rl = self.get_add_routelisting(i['route_short_name'])
-            rl.existence = 1
+            rl.isdelisted = False
             match = PATH_PATTERN.fullmatch(i['route_long_name'])
             rl.start = match.group(1)
             rl.dest = match.group(2)
