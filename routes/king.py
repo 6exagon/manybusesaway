@@ -3,17 +3,23 @@ Constants and implementations of package interfaces for King County Metro.
 See __init__.py for documentation.
 '''
 
+# This file will unfortunately need updating at the next service change
+# Discontinued routes are not being removed from the JSON listing, and it seems
+# that even more updates will soon come to the formatting
+# Trying to access the page for a discontinued route leads to an infinite loop
+# There are some wrong destinations as well
+
+from json import loads
 import re
 
 from . import DataParserInterface, RouteListingInterface, CSS_SPECIAL
 
-MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/'\
-    + 'fe-apps/schedule/08302025/js/find-a-schedule-js.js'
+MAIN_URL = 'cdn.kingcounty.gov/-/media/king-county/depts/metro/fe-apps/'\
+    + 'routes/data/route_list.json'
+CUT = (' (Snow shuttle)', ' Line')
 TROLLEY_URL = 'metro.kingcounty.gov/up/rr/m-trolley.html'
-ROUTE_PATTERN = re.compile(r'<option value="([^"]+)">(DART +)?([A-Z\d]+?)'\
-    + r'(?: Line| Shuttle)? - (.*?)<\/option>')
-SERVICE_PATTERN = re.compile(r'Service between (.*) and (?:the | )(.*)')
-LINK_BASE = 'https://kingcounty.gov'
+LINK_BASE = 'https://kingcounty.gov/en/dept/metro/routes-and-service/'\
+    + 'schedules-and-maps/'
 # King is the only reliable agency for route directions corresponding to
 # listing order, unfortunately
 LINK_OPTIONS = ('#route-map', '#weekday', '#weekday-b')
@@ -52,14 +58,13 @@ class RouteListing(RouteListingInterface):
         King County Metro routes require a more complex method to obtain
         route termini than a regex group.
         '''
-        match = SERVICE_PATTERN.match(string)
-        if match:
-            self.start, self.dest = match.group(1), match.group(2)
-            return
-        points = string.split(',')
+        points = string.replace(' (loop)', '').split(',')
         while (points[0].startswith('Serves') or 'School' in points[0]):
             del points[0]
         self.start = points[0].lstrip().rstrip()
+        if self.number == '45':
+            # Old destination still active; this is a quick fix
+            points[-1] = 'UW Station'
         self.dest = points[-1].lstrip().rstrip()
 
     def displaynum(self):
@@ -73,21 +78,35 @@ class DataParser(DataParserInterface):
     INITIAL_REQUESTS = {MAIN_URL, TROLLEY_URL}
 
     def update(self, resources):
-        main_js = resources[MAIN_URL]
-        if not main_js:
+        json = resources[MAIN_URL]
+        if not json:
             return
         trolley_html = resources[TROLLEY_URL]
         if not trolley_html:
             # Not a disaster, we can just render without visible trolley colors
             trolley_html = ''
-        for match in ROUTE_PATTERN.finditer(main_js):
-            if match.group(2):
-                number = match.group(2).rstrip() + match.group(3)
-            else:
-                number = match.group(3)
-            rl = self.get_add_routelisting(number)
+        json_list = loads(json)
+        commas = []
+        for i in json_list:
+            number = i['route_short_name']
+            if ',' in number:
+                commas.extend(number.split(', '))
+        for i in json_list:
+            number = i['route_short_name']
+            for c in CUT:
+                number = number.replace(c, '')
+            if not number.isnumeric() and len(number) > 1:
+                # Don't handle all the verbally-described ones
+                continue
+            if not i['in_service'] and number not in commas:
+                # Don't handle discontinued routes; crucially, comma'd routes
+                # should be included
+                # New formatting has '118, 119' as in_service, for example,
+                # but 118 and 119 aren't(?!)
+                continue
+            rl = self.get_add_routelisting('DART' * i['is_dart'] + number)
             rl.isdelisted = False
-            rl.parse_termini(match.group(4))
-            rl.set_links(LINK_BASE + match.group(1), LINK_OPTIONS)
+            rl.parse_termini(i['route_desc'])
+            rl.set_links(LINK_BASE + i['route_url'], LINK_OPTIONS)
             if 'Route ' + rl.number in trolley_html:
                 rl.css_class = 'trolley'

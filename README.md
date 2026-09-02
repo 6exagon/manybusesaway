@@ -26,6 +26,8 @@ Any directory can be specified instead of `images`; however, this must be a rela
 
 Please leave a credit link to this repository at the bottom of the generated HTML output.
 
+I have realized that the high rate at which transit agencies completely reformat public-facing websites and API endpoints will lead to more and more continuous work on this codebase as I add agencies. I hope this does not become unmanageable, but in case of infrequent updates there's a high chance this code will not work as-is.
+
 manybusesaway.py can also be imported and used for unrelated purposes; this project is (as far as I can tell) the only library of its kind available. Please see the [license](LICENSE.txt) for more details.
 
 ### History
@@ -36,9 +38,9 @@ In October 2024, the git and GitHub repository for this project was created (aft
 
 In September 2024, many transit agencies updated their routes for the first time since the creation of this project, adding new routes and deleting many existing ones. Thus, this page showed both completed but discontinued routes, and new routes which have since been completed. Updates to transit agencies' routes have since been numerous as the number of agencies tracked has grown, and until January 2026 all buses available since the addition of an agency were included. Agencies appear by default in roughly the order in which they were collected. In addition, some included edge cases (see below) were formerly not included; though many of these were completed long before this revision of the project (for example, the Link 2 Line at its opening), they have been revisited since December 2024 to obtain satisfactory photographs. Photographs must show the vehicle during operation and demonstrate which route it is on (though for some exceptional routes, this may not be obvious except to riders).
 
-Unfortunately, this stage of my life is much less compatible with this project, which requires frequent entirely free weekdays. As the number of agencies has grown, starting in 2026 I've sometimes been unable to complete buses before they're removed. That, and the renumbering of routes done by different agencies, has led to the number of discontinued routes ballooning. As such, they are now no longer listed. Anyone interested in which discontinued routes had been collected (almost all of them since the start of the project) is free to checkout past commits.
-
 Because git doesn't save file creation dates, it can overwrite them when checking out branches. This happened to the image files at one point. Luckily, the original "content created" file property was not touched, and it matched the creation dates perfectly, so they could be recovered.
+
+Unfortunately, this stage of my life is much less compatible with this project, which requires frequent entirely free weekdays. As the number of agencies has grown, starting in 2026 I've sometimes been unable to complete buses before they're removed. That, and the mass renumbering of routes done by different agencies, has led to the number of discontinued routes ballooning. As such, they are now no longer listed. Anyone interested in which discontinued routes had been collected (over 50, almost all of them since the start of the project) is free to checkout past commits.
 
 ### Included Routes
 
