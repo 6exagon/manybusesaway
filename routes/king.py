@@ -58,7 +58,8 @@ class RouteListing(RouteListingInterface):
         King County Metro routes require a more complex method to obtain
         route termini than a regex group.
         '''
-        points = string.replace(' (loop)', '').split(',')
+        # The ". " replacement is needed due to route 215 listing typo
+        points = string.replace(' (loop)', '').replace('. ', ', ').split(',')
         while (points[0].startswith('Serves') or 'School' in points[0]):
             del points[0]
         self.start = points[0].lstrip().rstrip()

@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.2.b1
+ManyBusesAway v4.2.b2
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -22,6 +22,11 @@ DEFAULT_AGENCIES_ORDER = (
     'skagit', 'whatcom', 'lewis', 'pacific', 'central')
 # TODO: grays before/after central
 
+# Note that in the script, which is the mechanism for collapsible sections,
+# the nextElementSibling of each originally-expanded element must be an
+# class expandingtable div and its firstChild must be a class rotated span
+# We want the table to start expanded (in case JS is disabled) but then be
+# collapsed by the script, at which point it's set for expansion and contraction
 FINAL_HTML = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -37,6 +42,24 @@ FINAL_HTML = '''
 %s
     <p>%s</p>
     <span class="credit" onclick="window.open(\'%s\', \'_blank\')">%s</span>
+    <script>
+      Array.from(document.getElementsByClassName("expanded")).forEach((e) => {
+        e.classList.toggle("expanded");
+        e.innerHTML = "<span class=\\"rotated\\">▶</span>" + e.innerHTML;
+        e.nextElementSibling.style.maxHeight = "0px";
+        e.addEventListener("click", function() {
+          this.classList.toggle("expanded");
+          const tbldiv = this.nextElementSibling;
+          if (tbldiv.style.maxHeight === "0px") {
+            this.firstChild.style.rotate = "90deg";
+            tbldiv.style.maxHeight = tbldiv.scrollHeight + "px";
+          } else {
+            this.firstChild.style.rotate = "0deg";
+            tbldiv.style.maxHeight = "0px";
+          }
+        });
+      });
+    </script>
   </body>
 </html>'''
 

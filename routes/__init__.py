@@ -25,7 +25,9 @@ SHORT_FILENAME_PATTERN = re.compile(r'([\w\d]*)\.[abefgijnpvw]+')
 TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # This is for RouteListings to export their own HTML, in to_html()
 DELISTED_NOTES = ('Delisted', 'delisted')
-TABLE_HTML = '    <h3>%s</h3>\n    <table>\n%s\n    </table>'
+# This h3 and its span will have the expanded and rotated properties toggled
+TABLE_HTML = '    <h3 class="expanded"> %s</h3>\n    '\
+    + '<div class="expandingtable"><table>\n%s\n    </table></div>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
 CSS_SPECIAL = 'x'
