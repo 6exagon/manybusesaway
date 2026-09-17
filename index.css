@@ -33,6 +33,11 @@ h3 {
     display: inline-block;
     transition: rotate 0.4s ease-out;
 }
+.percentage {
+    font-weight: normal;
+    font-size: 15px;
+    vertical-align: 3px;
+}
 table {
     border-collapse: collapse;
     table-layout: fixed;

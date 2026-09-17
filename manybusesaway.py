@@ -1,5 +1,5 @@
 '''
-ManyBusesAway v4.2.b2
+ManyBusesAway v4.2.b3
 This program and its accompanying modules are used to generate an HTML file
 to display completed buses from several transit agencies.
 Unfortunately, an HTML file with embedded JavaScript will not work for this;
@@ -45,7 +45,7 @@ FINAL_HTML = '''
     <script>
       Array.from(document.getElementsByClassName("expanded")).forEach((e) => {
         e.classList.toggle("expanded");
-        e.innerHTML = "<span class=\\"rotated\\">▶</span>" + e.innerHTML;
+        e.innerHTML = "<span class=\\"rotated\\">▶︎</span>" + e.innerHTML;
         e.nextElementSibling.style.maxHeight = "0px";
         e.addEventListener("click", function() {
           this.classList.toggle("expanded");

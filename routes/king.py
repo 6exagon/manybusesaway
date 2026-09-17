@@ -7,7 +7,6 @@ See __init__.py for documentation.
 # Discontinued routes are not being removed from the JSON listing, and it seems
 # that even more updates will soon come to the formatting
 # Trying to access the page for a discontinued route leads to an infinite loop
-# There are some wrong destinations as well
 
 from json import loads
 import re
