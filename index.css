@@ -18,6 +18,7 @@ h2 {
     font-weight: normal;
     margin: 0px;
     margin-top: 4px;
+    margin-bottom: 20px;
 }
 h3 {
     font-size: 20px;
@@ -33,10 +34,11 @@ h3 {
     display: inline-block;
     transition: rotate 0.4s ease-out;
 }
-.percentage {
+.fraction {
     font-weight: normal;
     font-size: 15px;
-    vertical-align: 3px;
+    vertical-align: 2px;
+    margin-left: 2px;
 }
 table {
     border-collapse: collapse;

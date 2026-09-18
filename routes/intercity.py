@@ -16,8 +16,8 @@ LINK_BASE = 'https://'
 # Allows no options; navigation is all done through JavaScript
 TABLE_NUM = re.compile(r'"route_short_name":"([^"]+)"}')
 TABLE_URL = 'www.intercitytransit.com/ride-fetch/api/route_schedule?route_id='
-TABLE_PATTERN = re.compile(
-    r'"Directions":{"0":"([^"]+?)(?: via [^"]+)?","1":"([^"]+?)(?: via [^"]+)?"')
+TABLE_PATTERN = re.compile(r'"Directions":{"0":"(?:To )?([^"]+?)'
+    + r'(?: via [^"]+)?","1":"(?:To )?([^"]+?)(?: via [^"]+)?"')
 
 class RouteListing(RouteListingInterface):
     def __init__(self, short_filename):

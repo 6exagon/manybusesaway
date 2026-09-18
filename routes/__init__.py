@@ -26,9 +26,9 @@ TIME_FORMAT = '%-m/%-d/%y %-H:%M'
 # This is for RouteListings to export their own HTML, in to_html()
 DELISTED_NOTES = ('Delisted', 'delisted')
 # This h3 and its span will have the expanded and rotated properties toggled
-TABLE_HTML = '    <h3 class="expanded"> %s <span class="percentage">(%s%%)'\
-    + '</span></h3>\n    <div class="expandingtable"><table>\n%s\n    </table>'\
-    + '</div>'
+TABLE_HTML = '    <h3 class="expanded"> %s <span class="fraction"'\
+    + ' style="color:%s">(%d/%d)</span></h3>\n    <div class="expandingtable">'\
+    + '<table>\n%s\n    </table></div>'
 ROW_HTML = '%s<tr>%s</tr>' % (' ' * 6, '%s' * 6)
 IMG_HTML = '<img src="%s" alt="%s" title="%s" width=100></img>'
 CSS_SPECIAL = 'x'
@@ -303,8 +303,13 @@ class DataParserInterface(ABC):
                 print(l)
         rows = '\n'.join(l.to_html() for l in listings)
         total, completed = self.completed()
+        fractioncolor = 'inherit'
+        if total == completed:
+            fractioncolor = '#77a07f'
+        elif completed == 0:
+            fractioncolor = '#afafaf'
         return TABLE_HTML % (
-            self.AGENCY_FULL_NAME, completed * 100 // total, rows)
+            self.AGENCY_FULL_NAME, fractioncolor, completed, total, rows)
 
 def td(data, css_class=None, **kwargs):
     '''
